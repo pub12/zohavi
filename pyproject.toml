@@ -1,13 +1,9 @@
 [tool.poetry]
 name = "zohavi"
-version = "0.1.13"
-description = ""
+version = "0.1.15"
+description = "Web widgets"
 authors = ["pub12 <pubudu79@gmail.com>"]
-#packages = [ 
-#                { include = "zbase" },
-#                { include = "zcommon" },
-#            ]
-
+readme = "README.md"
             
 [tool.poetry.dependencies]
 python = "^3.8"
