@@ -23,20 +23,19 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
       
-      - name: Set up Python 3.9
+      - name: Set up Python 3.8
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
       
       - name: Install poetry
         run: pip install poetry
-        
+      
       # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Run poetry
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          poetry config pypi-token.pypi "${{ secrets.PYPI_API_KEY }}"
+          poetry version patch
+          poetry build
+          poetry publish
+          
