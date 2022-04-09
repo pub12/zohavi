@@ -1,0 +1,141 @@
+{% extends "zbase/base.html" %}
+
+{% block main_body %}
+  <div class="is-flex screen_height">
+    <div class="container is-flex">
+
+<!--       
+      <div class="container">
+        <h1 class="title"> hello world webui</h1>  
+      </div> -->
+
+
+      <div class="container">
+
+        <wc-tab id="env_tab" tabs= ' [
+                                              {"id":"i_tab_group_1", "status":"active", "target":"i_group_1", "icon":"fas fa-image", "label":"Group 1" },
+                                              {"id":"i_tab_group_2", "status":"inactive", "target":"i_group_2", "icon":"fas fa-image", "label":"Group 2" },
+                                              {"id":"i_tab_group_3", "status":"inactive", "target":"i_group_3", "icon":"fas fa-image", "label":"Group 3" }
+                                            ]
+                                          '>
+        </wc-tab>
+
+        <wc-tab-panel class="sck_env_panel   "   id="i_group_1">  
+          <div class="container">
+            <wc-input-text  id="si_site_name" class="sck_site_cnf_validate" placeholder="Add site title" label="Site Name" placeholder="Add site title"
+                        validation='{"text_min_len":3}', message_err="Site name at least 3 characters" , value='abc' >
+            </wc-input-text>   
+
+
+            <wc-input-hidden type="hidden" id="si_site_id" class="sck_site_cnf_validate" value="123"></wc-input-hidden>
+
+            <wc-button id="sci_site_cancel" label="Cancel" active_class="none" > </wc-button>  
+
+            <wc-select id="si_env_list" class="  " label="Environment List" message_err="" value="" 
+                                    list='{"apple":"Apple", "samsung":"samsung", "nokia":"Nokia"}' 
+                                    
+                                    blank_entry="- Chose option - "  
+
+                                    item_select_get_data=""
+                                    select_change_target=''
+                                    >
+            </wc-select>  
+          </div>
+          
+        </wc-tab-panel>
+
+        <wc-tab-panel class="sck_env_panel   "   id="i_group_2">
+            <div class="container">
+              <wc-checkbox id="si_env_root" class="  sck_grp_env_config" checkbox_label="Source/Root Environment?" 
+                                label="Root Environment" value="false">
+              </wc-checkbox>
+
+
+              <wc-radio-button  id="i_logon_auth_mode" class="sck_site_cnf_validate" 
+                                        label = "Chose authentication mode" 
+                                        radio_list ='[ {"label":"Username & passowrd", "value":"user", "checked":"false"},
+                                                {"label":"Email & passowrd", "value":"email", "checked":"true"},
+                                                {"label":"Username, email & passowrd", "value":"user_email", "checked":"false"}
+                                              ]'
+                                        render = "vertical"
+
+                                        >
+              </wc-radio-button>
+
+              <wc-radio-button  id="i_logon_auth_mode" class="sck_site_cnf_validate" 
+                                        label = "Chose authentication mode" 
+                                        radio_list ='[ {"label":"Username & passowrd", "value":"user", "checked":"false"},
+                                                {"label":"Email & passowrd", "value":"email", "checked":"true"},
+                                                {"label":"Username, email & passowrd", "value":"user_email", "checked":"false"}
+                                              ]'
+                                        render = "horizontal"
+
+                                        >
+                </wc-radio-button>
+
+
+            </div>
+            
+        </wc-tab-panel>   
+
+        <wc-tab-panel class="sck_env_panel    "   id="i_group_3"> 
+          <div class="container sc_layer_0 ">  
+            <wc-table     id="i_env_sys_filepaths" 
+                  class="sck_config_validate" 
+                  
+                  columns='[
+                        {"col_label":"File Config Type", "key":"ck_file_type", "type":"select", "editable":"true", "key_cell":"true", "param":{"list":"file_type_list"} },
+                        {"col_label":"Desc", "key":"ck_file_type_desc", "editable":"true"},
+                        {"col_label":"Path", "key":"ck_file_path", "type":"input", "editable":"true", "validation":{"is_unix_path":"true"} },
+                        {"col_label":"Action", "key":"ck_db_action", "type":"actions", "data-key":"ck_env_edit", "actions":["edit","delete"] }
+                  ]'
+
+                  param='{
+                            "file_type_list":{"log":"Log", "base":"Base Directory", "app":"App Directory",  "def":"Library Directory", "resdef":"Resource  Directory"}
+                }'
+
+                  data='[  [  {"key":"ck_file_type", "value":"base"  },
+                              {"key":"ck_file_type_desc", "value":"Base directory path"},
+                              {"key":"ck_file_path", "value":""} ],
+                           [  {"key":"ck_file_type", "value":"log"  },
+                              {"key":"ck_file_path", "value":"log/log_dev.txt", "validation":"{`is_unix_file`:`true`}"} ],
+                           [  {"key":"ck_file_type", "value":"def"  },
+                              {"key":"ck_file_path", "value":"_def/"} ],
+                           [  {"key":"ck_file_type", "value":"app"  },
+                              {"key":"ck_file_path", "value":"app/"} ],
+                           [  {"key":"ck_file_type", "value":"ts"  },
+                              {"key":"ck_file_path", "value":"ts/"} ],
+                           [  {"key":"ck_file_type", "value":"resdef"  },
+                              {"key":"ck_file_path", "value":"app/resources"} ] 
+                        ]  '
+              >  
+            </wc-table>
+          </div>
+        </wc-tab-panel>
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+    
+{% endblock %} 
+
+
+{% block page_script %}
+
+<script type="module" src="/webui/static/zwc/wc_form_input.js"></script> 
+<script type="module" src="/webui/static/zwc/wc_form_select.js"></script> 
+<script type="module" src="/webui/static/zwc/wc_form_button.js"></script> 
+<script type="module" src="/webui/static/zwc/wc_form_hidden.js"></script> 
+<script type="module" src="/webui/static/zwc/wc_form_checkbox.js"></script> 
+<script type="module" src="/webui/static/zwc/wc_form_radio.js"></script> 
+<script type="module" src="/webui/static/zwc/wc_panel.js"></script> 
+<script type="module" src="/webui/static/zwc/wc_tab.js"></script> 
+<script type="module" src="/webui/static/zwc/wc_table.js"></script> 
+<!-- <script type="module" src="/webui/static/zwc/wc_form_input.js"></script> 
+<script type="module" src="/webui/static/zwc/wc_form_input.js"></script>  -->
+
+{% endblock %}
