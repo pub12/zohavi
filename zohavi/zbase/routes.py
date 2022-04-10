@@ -8,6 +8,9 @@ from flask_login import current_user #,   login_required
 from flask_classful import FlaskView, route
 from flask import   send_file, current_app, render_template,  current_app , abort
 
+
+
+
 class BaseView(FlaskView):
 	route_base = '/'
 	# bpname = 'base'
