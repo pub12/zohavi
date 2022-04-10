@@ -6,6 +6,7 @@ sys.path.insert(0, '../')
 from flask import Flask, render_template, jsonify
 from zohavi.zbase.routes import BaseView
 from zohavi.zwebui.routes import WebUIView
+from zohavi.zmembers.routes import MembersView
 
 
 class TestProc(unittest.TestCase):
@@ -14,18 +15,13 @@ class TestProc(unittest.TestCase):
 		app = Flask(__name__)
 		app.register_blueprint( BaseView.bp, url_prefix='/base' )
 		app.register_blueprint( WebUIView.bp, url_prefix='/webui' )
+		app.register_blueprint( MembersView.bp, url_prefix='/members' )
 		app.debug = False
 
-		# app.config['DEBUG'] = False
-		app.config['TESTING'] = False
-		app.config['DEBUG_TB_ENABLED'] = True
-		app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-		app.config['EXPLAIN_TEMPLATE_LOADING'] = True
-		
 		return app
 
 	# from zohavi_procs import 
-	def test_webui_blueprint_registration(self):
+	def test_members_blueprint_registration(self):
 		app = self.create_app()
 		self.assertNotEqual( app, None)
 
@@ -39,18 +35,15 @@ class TestProc(unittest.TestCase):
 				routes[r.rule] = {}
 				routes[r.rule]["functionName"] = r.endpoint
 				routes[r.rule]["methods"] = list(r.methods)
-
 			routes.pop("/static/<path:filename>")
-
 			return jsonify(routes)
 			
 		@app.route("/")
 		def hello_world():
 			# raise
-			return render_template('test_zwebui_001.html')
+			return render_template('test_zmembers_001.html')
 
-
-		app.run(host="0.0.0.0", port=8601)
+		app.run(host="0.0.0.0", port=8602)
 
 if __name__ == '__main__':
     unittest.main()
