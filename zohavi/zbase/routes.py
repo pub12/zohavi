@@ -15,9 +15,13 @@ class BaseView(FlaskView):
 
 	##############################################################################################################
 	def __init__(self):
-		print('***init now**')
-		breakpoint()
-		self.module_name = __name__
+		self.module_name = __name__ 
+
+	##############################################################################################################
+	def register_app(self, app_ref, logger_ref):
+		self.myapp = app_ref
+		sef.logger = logger_ref
+
 
 	##############################################################################################################
 	#	Return any static resources
