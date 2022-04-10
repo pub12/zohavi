@@ -1,11 +1,8 @@
     import ValidationHelper from '/webui/static/zjs/validation_helper.js'; //
     import WCMaster from  '/webui/static/zwc/wc_master.js' ;
-    import WCPanel from   '/webui/static/zwc/wc_panel.js' ;
+    // import WCPanel from   '/webui/static/zwc/wc_panel.js' ;
 
-
-
-
-    export   class WCTab extends WCMaster  { 
+       class WCTab extends WCMaster  { 
         define_template(){
             return super.define_template() + `
                     <div class=" tabs is-boxed pt-2">
@@ -109,8 +106,54 @@
 
     }
 
+
+    //
+    class WCPanel extends WCMaster  { 
+        define_template(){
+            return super.define_template() + ` 
+                    <div class="  is-hidden m-1" id="si_field">
+                        <slot></slot>
+                    </div>
+
+            `
+        } 
+
+        constructor( ) {
+            // super();  
+            super( {}, ["id"]); 
+            
+        }
+
+        init_component(){}
+        
+        hide(){
+            this.shadowRoot.querySelector('#si_field').classList.add('is-hidden');
+
+            //trigger event that panel is hidden
+            const event = new CustomEvent('panel_disappear', { detail: {this:this  }} );
+            this.dispatchEvent(event , { bubbles:true, component:true} ); 
+        }
+
+        show(){
+            this.shadowRoot.querySelector('#si_field').classList.remove('is-hidden');
+
+            //trigger event that panel is shown
+            console.log("trigger panel appear [0]:" + this.id )
+            // console.log( this.id )
+            const event = new CustomEvent('panel_appear', { detail: {this:this  }} );
+            // this.dispatchEvent(event , { bubbles:true, component:true} ); 
+            this.dispatchEvent(event , {bubbles:true,component:true } ); 
+            console.log("trigger panel appear [1]:" + this.id )
+        }
+
+    }
+
+    // var ver = 1
+
+    // console.log( "Version=" + ver )
+    // console.log( 'adding wc-tab')
+    window.customElements.define('wc-tab-panel', WCPanel);
     window.customElements.define('wc-tab', WCTab);
-
-
-     
+    // console.log( 'adding wc-tab-panel')
+    
 
