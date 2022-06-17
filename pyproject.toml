@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "zohavi"
-version = "0.1.38"
+version = "0.1.39"
 description = "Web widgets"
 authors = ["pub12 <pubudu79@gmail.com>"]
 readme = "README.md"
             
 [tool.poetry.dependencies]
 python = "^3.8"
-json-cfg = "*"
+json-cfg = "*" 
 
 
 [tool.poetry.dev-dependencies]
