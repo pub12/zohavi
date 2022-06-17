@@ -8,10 +8,11 @@ from flask_login import current_user #,   login_required
 from flask_classful import FlaskView, route
 from flask import   send_file, current_app, render_template,  current_app , abort
 
+from .staple import Staple
 
 
 
-class BaseView(FlaskView):
+class BaseView(FlaskView, Staple):
 	route_base = '/'
 	# bpname = 'base'
 	bp = bp
@@ -23,7 +24,26 @@ class BaseView(FlaskView):
 	##############################################################################################################
 	def register_app(self, app_ref, logger_ref):
 		self.myapp = app_ref
-		sef.logger = logger_ref
+		self.logger = logger_ref
+
+	# def log_debug(self, message):
+	# 	if self.logger: self.logger.debug( message )
+	# 	else: print( "DEBUG:" + message )
+
+	# def log_error(self, message):
+	# 	if self.logger: self.logger.error( message )
+	# 	else: print( "ERROR:" + message )
+
+	# def log_info(self, message):
+	# 	if self.logger: self.logger.info( message )
+	# 	else: print( "INFO:" + message )
+
+	# def log_warning(self, message):
+	# 	if self.logger: self.logger.warning( message )
+	# 	else: print( "WARNING:" + message )
+
+
+
 
 	# @self.myapp.app.after_request
 	# def set_response_headers(response):

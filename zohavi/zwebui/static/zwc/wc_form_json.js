@@ -9,7 +9,7 @@
     // document.head.appendChild(imported);
 
     // import {  Ajv } from  "https://cdnjs.cloudflare.com/ajax/libs/ajv/8.1.0/ajv7.bundle.js" 
-    import  ajv7  from  "/webui/static/zjs/library/ajv7.js" 
+    import  ajv7  from  "/webui/static/zjs/ajv7.js" 
  
     
 

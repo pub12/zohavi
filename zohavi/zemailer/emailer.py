@@ -4,13 +4,16 @@ from email.mime.multipart import MIMEMultipart
 from email.header    import Header
 
 from prepost import PreCond 
+from zohavi.zbase.staple import Staple
 
-class Emailer():
+class Emailer(Staple):
 	####################################################
 
 	@PreCond.dict_has_fields( config=[ 'HOST', 'PORT', 'SENDER', 'PASSWORD'])
 	def __init__(self, config, logger=None):
-		self.logger = logger
+		super().__init__(logger_ref = logger )
+		self.debug = True
+
 		self.config  = config
 		self.context = ssl.create_default_context()
 
@@ -64,12 +67,4 @@ class Emailer():
 	# 										user=user, token=token) } )   
 
 
-	####################################################
-	def log_debug(self, message):
-		if(self.logger): self.logger.debug(message)
-	
-	####################################################
-	def log_error(self, message):
-		if(self.logger): self.logger.error(message)
-	
 	

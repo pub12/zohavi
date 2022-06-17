@@ -6,7 +6,7 @@ from sqlalchemy import DateTime, Column
 
 ############################################################################################################
 ############################################################################################################
-class TableDefault(object  ):
+class TBL_Default(object  ):
 	sys_created_on = Column( DateTime,  default=datetime.datetime.utcnow ) 
 	sys_changed_on = Column( DateTime ) 
 	def __getitem__(self, field):
