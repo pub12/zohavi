@@ -1,5 +1,6 @@
     
-    import C_UTIL from '/webui/static/zjs/common_utils.js'; //
+    import C_UTIL, {C_UI, C_AJAX } from '/webui/static/zjs/common_utils.js'; //
+    // import {C_UI, C_AJAX} from '/webui/static/zjs/common_utils.js'; //
 
     import ValidationHelper from '/webui/static/zjs/validation_helper.js'; //
     import WCFormControl from  "/webui/static/zwc/wc_form_main.js" 
@@ -8,7 +9,7 @@
     // import WCButton from  "/common/st/_def/commonui/static/_def/wc/wc_form_button.js" 
 
 
-
+ 
     class WCTable extends WCFormControl { 
         define_template_globals(){
             return `:host{ 
@@ -129,7 +130,9 @@
                     //       ]'
 
         constructor(){
-            super( {"add_row":"Add Env +", "data=json":"[]", "param=json":"[]", 
+            super( {"add_row":"", "data=json":"[]", "param=json":"[]", 
+                    "submit_on_add":"",  "submit_on_edit":"",
+                    "popup_message_submit_success":"", "popup_message_submit_fail":"",
                     "action_icons=json":'{"edit":"fas fa-edit","delete":"fas fa-trash"}'}, ["columns=json"]); 
             // this.log('hello world')
 
@@ -155,7 +158,10 @@
             
             this._modal_ref = this.shadowRoot.querySelector('#si_modal')
 
-            this.shadowRoot.querySelector('#si_add_row').addEventListener('click', this.evt_add_row_clicked.bind(this) );
+            var add_row_elt = this.shadowRoot.querySelector('#si_add_row')
+            if( add_row_elt){
+                add_row_elt.addEventListener('click', this.evt_add_row_clicked.bind(this) );
+            }
             // this.init_modal( this._inp.columns);
         }
 
@@ -249,17 +255,39 @@
             this.log( 'showed modal')
         }
 
-
+        //************************************************************************************
+        submit_data( url, data){
+            var this_ref = this
+            C_AJAX.ajax_post( url, data, 
+                function(success_data){
+                    if( this_ref._inp.popup_message_submit_success  ){
+                        C_UI.popup_success( this_ref._inp.popup_message_submit_success );
+                    }
+                    this_ref.trigger_custom_event( success_data, 'submit_success');
+                },
+                function(fail_data){
+                    if( this_ref._inp.popup_message_submit_fail  ){
+                        C_UI.popup_fail( this_ref._inp.popup_message_submit_fail );
+                    }
+                    this_ref.trigger_custom_event( fail_data, 'submit_failed');
+                } );
+        }
         //************************************************************************************
         callback_row_add(action,  ref_data,  new_data){
             // debugger;
-            if( action != this._modal_ref.C_SAVE){ return }
+            // this.log()
+            console.log('adding')
+            console.log( JSON.stringify( new_data) )
+            if( action == this._modal_ref.C_SAVE){ 
 
-            // debugger;
-
-            this._callback_row_add_update_table(new_data);
-            this._callback_row_add_update_data_twin(new_data);
-            this.add_table_row_item_events()
+                if( this._inp.submit_on_add ){
+                    console.log('submit_on_add')
+                    this.submit_data( this._inp.submit_on_add, new_data )
+                }
+                this._callback_row_add_update_table(new_data);
+                this._callback_row_add_update_data_twin(new_data);
+                this.add_table_row_item_events()
+            }
         }
 
         _callback_row_add_update_data_twin(new_data){
@@ -291,8 +319,10 @@
         //edit row number (zero index entry)
         callback_row_edited(action, ref_data, new_data){
             var this_obj = this;
-            
+             
             if(action == this._modal_ref.C_SAVE ){
+                console.log( JSON.stringify( new_data) )
+                
                 // var row_elt = this.shadowRoot.querySelectorAll('tr.sck_data_row')[ ref_data['row_no'] ]
                 var row_elt = this.shadowRoot.querySelector(`tr[data-row_no='${ ref_data['row_no'] }']` )
                 // 

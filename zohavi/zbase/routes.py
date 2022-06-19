@@ -6,13 +6,13 @@ from . import bp
 
 from flask_login import current_user #,   login_required
 from flask_classful import FlaskView, route
-from flask import   send_file, current_app, render_template,  current_app , abort
+from flask import   send_file, current_app, render_template,  current_app , abort, jsonify
 
-from .staple import Staple
+from .staple import ZStaple
+ 
 
 
-
-class BaseView(FlaskView, Staple):
+class BaseView(FlaskView, ZStaple):
 	route_base = '/'
 	# bpname = 'base'
 	bp = bp
@@ -43,6 +43,20 @@ class BaseView(FlaskView, Staple):
 	# 	else: print( "WARNING:" + message )
 
 
+	##############################################################################################################
+	#	list all routes
+	##############################################################################################################
+	@route("/routes", methods=["GET"])
+	def getRoutes(self):
+		routes = {}
+		for rule_item in current_app.url_map._rules:
+			routes[rule_item.rule] = {}
+			routes[rule_item.rule]["functionName"] = rule_item.endpoint
+			routes[rule_item.rule]["methods"] = list(rule_item.methods)
+
+		# routes.pop("/static/<path:filename>")
+
+		return jsonify(routes)
 
 
 	# @self.myapp.app.after_request

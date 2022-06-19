@@ -9,7 +9,11 @@
 
         init_content_area(){
             this._content_area = document.querySelector( this.menu_obj.wc_inp_data.main_div_selector );
-        }
+
+            if( ! this._content_area){
+                throw `**The associated element from attribute [main_div_selector=${this.menu_obj.wc_inp_data.main_div_selector }] could not be found `
+            }
+        } 
 
         menu_show_render_content_area(){ }
         menu_hide_render_content_area(){ }

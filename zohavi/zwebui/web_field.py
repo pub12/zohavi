@@ -1,9 +1,9 @@
 import re, json 
 
-from zohavi.zbase.staple import Staple
+from zohavi.zbase.staple import ZStaple
 from mclogger import MCLogger
 
-class WebField( Staple ):
+class WebField( ZStaple ):
 	def __init__(self, fields, app=None, logger=None):
 		super().__init__(app = app, logger = logger )
 		self.debug = True
@@ -30,8 +30,8 @@ class WebField( Staple ):
 	@MCLogger.logfunc_cls('logger')
 	def validate(self, data):
 		validation_ok = True 
-		logger.debug( "validating:" + json.dumps(data ) )
-		logger.debug( "Master:" + json.dumps(self._fields ) )
+		self.log_debug( "validating:" + json.dumps(data ) )
+		self.log_debug( "Master:" + json.dumps(self._fields ) )
 
 		for data_row in data:	#loop through each web data field
 			web_field_name = data_row['id']
@@ -84,7 +84,7 @@ class WebField( Staple ):
 
 
 
-class Transform(Staple):
+class Transform(ZStaple):
 
 	@staticmethod
 	def _func_not_found( value, param):
@@ -102,7 +102,7 @@ class Transform(Staple):
 
 
 
-class Validate(Staple):
+class Validate(ZStaple):
 	#############################################################################################################
 	#Check if the current 
 	@staticmethod

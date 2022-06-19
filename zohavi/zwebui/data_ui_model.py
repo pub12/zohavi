@@ -1,19 +1,22 @@
 import  json 
 
 from zohavi.zwebui.web_field import WebField
+from zohavi.zbase.staple import ZStaple
 # from _def.common.selector import Selector
 from dataobjtools.selector import Selector
 import importlib
 
 
-class DataUIModel:
+class DataUIModel(ZStaple):
 	#####################################################################################
 	def __init__(self, update_obj, form_field_validation_schema, session, logger ):
+
+		super().__init__(app = None, logger = logger )
 
 		self.update_obj_list = update_obj
 		self.data_schema = form_field_validation_schema 
 		self.web_schema = WebField( form_field_validation_schema, logger=logger )
-		self.logger = logger
+		# self.logger = logger
 		self.session = session
 
 		# pass
@@ -26,7 +29,7 @@ class DataUIModel:
 		return None
 
 	#####################################################################################
-	def get_field( self, obj_name, field_html_name):
+	def get_field_schema( self, obj_name, field_html_name):
 		table_obj_rec = self.data_schema.get( obj_name )
 
 		if table_obj_rec:
@@ -35,11 +38,11 @@ class DataUIModel:
 
 	#####################################################################################
 	def _data_validate( self, submit_data ): 
-		self.logger.debug("validating data")
-		self.logger.debug( submit_data )
+		self.log_debug("validating data")
+		self.log_debug( submit_data )
 
 		if self.web_schema.validate(  submit_data ):
-			self.logger.debug('validation ok')
+			self.log_debug('validation ok')
 			return True
 		return False
 
@@ -49,7 +52,7 @@ class DataUIModel:
 			data_obj_list = self.data_delete( submit_data ) 
 			return json.dumps({'success':True, 'schema':self.data_schema }), 200
 		else:
-			self.logger.error('valdation failed')  
+			self.log_error('valdation failed')  
 			return json.dumps({'success':False}), 500 
 
 	#####################################################################################
@@ -76,7 +79,7 @@ class DataUIModel:
 		for obj_name, data_table in self.data_schema.items():
 			if obj_name in self.update_obj_list:
 				db_fields = self._data_get_table_fields( data_table['fields'] , search_dict )
-				self.logger.debug(f"{obj_name} Read table: {data_table['module_name']}::{ data_table['table_obj'] } with search keys {db_fields['keys'] }" )	
+				self.log_debug(f"{obj_name} Read table: {data_table['module_name']}::{ data_table['table_obj'] } with search keys {db_fields['keys'] }" )	
 				
 				if db_fields:
 					data_class_ref = getattr(importlib.import_module( data_table['module_name'] ), data_table['table_obj'] )	#Get ref to table object name dynamically
@@ -86,24 +89,27 @@ class DataUIModel:
 						if ret_db_obj: data_obj_list.append( data_item  )
 						else: data_obj_list.append( data_item.to_dict()  )
 
-		[ self.logger.debug( f'Data from query: {data_item}')  for data_item in data_obj_list ] 
+		[ self.log_debug( f'Data from query: {data_item}')  for data_item in data_obj_list ] 
 		return data_obj_list
 
 	#####################################################################################
 	def data_update_ajax( self, submit_data ): 
-		if self._data_validate( submit_data):
+		if not submit_data:
+			self.log_error('No data given')  
+			return json.dumps({'success':False}), 500 
+		elif self._data_validate( submit_data):
 			data_obj_list = self.data_update( submit_data )
 			# breakpoint()
 			return json.dumps({'success':True, 'data':  data_obj_list , 'schema':self.data_schema  }), 200
 		else:
-			self.logger.error('valdation failed')  
+			self.log_error('valdation failed')  
 			return json.dumps({'success':False}), 500 
 
 	#####################################################################################
 	def data_delete(self, web_data):
 		for obj_name, data_table in self.data_schema.items():
 			db_fields = self._data_get_table_fields( data_table['fields'] , web_data )
-			self.logger.debug(f"{obj_name} Delete table: {data_table['module_name']}::{ data_table['table_obj'] } with search keys {db_fields['keys'] }" )
+			self.log_debug(f"{obj_name} Delete table: {data_table['module_name']}::{ data_table['table_obj'] } with search keys {db_fields['keys'] }" )
 
 			data_class_ref = getattr(importlib.import_module( data_table['module_name'] ), data_table['table_obj']  )	#Get ref to table object name dynamically
 			data_obj = None
@@ -128,7 +134,7 @@ class DataUIModel:
 		for obj_name, data_table in self.data_schema.items():
 			if obj_name in self.update_obj_list:
 				db_fields = self._data_get_table_fields( data_table['fields'] , web_data )
-				self.logger.debug(f"{obj_name} Modify table: {data_table['module_name']}::{ data_table['table_obj'] } with search keys {db_fields['keys'] }" )	
+				self.log_debug(f"{obj_name} Modify table: {data_table['module_name']}::{ data_table['table_obj'] } with search keys {db_fields['keys'] }" )	
 				
 				data_class_ref = getattr(importlib.import_module( data_table['module_name'] ), data_table['table_obj'] )	#Get ref to table object name dynamically
 				data_obj = None
@@ -156,9 +162,9 @@ class DataUIModel:
 		# breakpoint()
 		for field_name, field in table_schema_fields.items():	#Loop through each of the fields in a given table
 			
-			new_field = Selector().search( web_data, {'id': field_name  } )
+			new_field = Selector().dict_search( web_data, {'id': field_name  } )
 			if not new_field: 
-				self.logger.error(f'Could not find key [{field_name}] within web_data:[{web_data}]')
+				self.log_error(f'Could not find key [{field_name}] within web_data:[{web_data}]')
 			else:
 				# self.logger.debug(f"Adding field [{field_name}] value of: [{ new_field['value']  }]")
 				if field.get("key") :
@@ -166,5 +172,5 @@ class DataUIModel:
 				else:
 					db_fields[ "fields"][ field["field_db"] ] = new_field['value'] 
 
-		self.logger.debug(f"fields: {db_fields}")
+		self.log_debug(f"fields: {db_fields}")
 		return db_fields 

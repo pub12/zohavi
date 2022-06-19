@@ -138,7 +138,7 @@
 
         evt_scroll(event){
             // debugger;
-            console.log(  `ScrollTop = ${document.documentElement.scrollTop} , offset=${this.wc_shadowRoot.querySelector('#si_sbar_menu').offsetHeight}` )
+            // console.log(  `ScrollTop = ${document.documentElement.scrollTop} , offset=${this.wc_shadowRoot.querySelector('#si_sbar_menu').offsetHeight}` )
             // debugger;
         }
         //******************************************************************** 

@@ -118,7 +118,7 @@
                 });
                 menu_items_str += '</ul>';
             }else{
-                menu_items_str += `<li id="${menu["id"]}"><a href="#" class="sc_sbar_menu_item ${menu_active_class}">` +
+                menu_items_str += `<li id="${menu["id"]}"><a href="${menu["link"]}" class="sc_sbar_menu_item ${menu_active_class}">` +
                                `${icon_str} <span class="sck_menu_item_text">${menu["title"]}</span> </a>`;
             }
             menu_items_str += '</li>'

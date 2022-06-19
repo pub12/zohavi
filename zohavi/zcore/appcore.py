@@ -11,19 +11,21 @@ from zohavi.zwebui.jinja_cust_funcs import JCFunc
 from zohavi.zconfig.models import MDL_Config
 	
 class AppCore:
-	def __init__(self, app,  sccfg, env): 
+	def __init__(self, app,  sccfg, env, test_only=False): 
 		self._app = app 
 		# self._app.config.update( config.to_flask()  )
 
 		self._app.config['SQLALCHEMY_DATABASE_URI'] = sccfg.get_env_config( env ).db_core
 		self.db = SQLAlchemy(self._app)
 		self._ref_config = MDL_Config( logger=None, db=self.db)
-		self._sync_core_config_to_db( sccfg, env )
 
-		self._app.config.update( self._ref_config.to_flask_config()  )
+		if not test_only: 
+			self._sync_core_config_to_db( sccfg, env )
+			self._app.config.update( self._ref_config.to_flask_config()  )
 
 		# self.db = SQLAlchemy(self._app)
 		self._migrate = Migrate(self._app, self.db)
+
 
 		self.login = LoginManager(self._app)
 		self.login.login_message_category = "danger"  #when cannot login, set error type to red color on display
@@ -38,6 +40,7 @@ class AppCore:
 		self._app.run(*args, **kwargs)
 
 	##############################################################################################
+	# Copy the basic cofig and put it to the database
 	def _sync_core_config_to_db(self,  sccfg, env):
 		self._ref_config.set_config( config_str='SYS///LOG_FILE', value=sccfg.get_env_config( env ).log_file )
 		self._ref_config.set_config( config_str='SYS///HOST', value=sccfg.get_env_config( env ).host )

@@ -6,7 +6,7 @@ document.head.appendChild(imported);
 
 
 
-  class C_AJAX{
+  export class C_AJAX{
 
 
     // static x_call_json(url, dict_data, updating_message, success_message, fail_message, success_func=null, fail_func=null, debug=false){ 
@@ -83,7 +83,7 @@ document.head.appendChild(imported);
 }
 
 
-class C_UI{
+export class C_UI{
   
   //************************************************************************************
   //scroll to top of a field
@@ -260,7 +260,7 @@ export default class  C_UTIL{
   }
 }
 
-class C_FRM{
+export class C_FRM{
   
   // //************************************************************************************
   // static x_get_form_data_to_json(form_ref){

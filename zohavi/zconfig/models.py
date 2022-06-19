@@ -3,13 +3,13 @@ import json, datetime
 from sqlalchemy import DateTime, Column
 
 from zohavi.zdb.models import TBL_Default
-from zohavi.zbase.staple import Staple
+from zohavi.zbase.staple import ZStaple
 from prepost import PreCond
 
 
 ############################################################################################################
 ############################################################################################################
-class MDL_Config(Staple):
+class MDL_Config(ZStaple):
 	def __init__(self, logger, db):
 		super().__init__(logger=logger, app=None)
 		self.db = db
@@ -20,7 +20,7 @@ class MDL_Config(Staple):
 			area 		= db.Column(db.String(25) ) 
 			category 	= db.Column(db.String(25) ) 
 			sub_cat		= db.Column(db.String(25) ) 
-			_config_items = db.relationship('TBL_ConfigItem', cascade='all,delete', backref='config', passive_deletes=True)
+			_config_items = db.relationship('TBL_ConfigItem', cascade='all,delete',  passive_deletes=True, back_populates="_config")
 		
 		class TBL_ConfigItem(db.Model, TBL_Default):
 			__tablename__ = 'config_item' 
@@ -30,7 +30,7 @@ class MDL_Config(Staple):
 			name = db.Column(db.String(100) ) 
 			value = db.Column(db.String(255) ) 		
 			flask_name = db.Column(db.String(100) ) 
-			_config = db.relationship('TBL_Config', backref='config_item')
+			_config = db.relationship('TBL_Config',   back_populates="_config_items")
 	
 		self._tables = {}
 		self._tables['TBL_Config'] 	   = TBL_Config

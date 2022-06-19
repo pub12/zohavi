@@ -11,7 +11,7 @@
 //
 //
 //**************************************************************************************************************
-    import ('/webui/static/zjs/common_utils.js'); //
+    import {C_UI, C_AJAX} from '/webui/static/zjs/common_utils.js'; //
     import WCMaster from  '/webui/static/zwc/wc_master.js' ;
 
 
@@ -27,7 +27,13 @@
         //*********************************************************************************************************************
         // CONSTRUCTOR
         constructor() {
-            super( {   action:"", active_class:"is-primary", deactive_class:"[disabled]", size: "is-small", submit_data_selector:""}, ["label"]);  
+            super( {    action:"", active_class:"is-primary", deactive_class:"[disabled]", 
+                        size: "is-small", submit_data_selector:"", 
+                        popup_message_submit_success:"", 
+                        popup_message_submit_fail:""
+                    }, 
+                    ["label"]);  
+
             this.init_button();
             this._debug = true 
         }
@@ -65,14 +71,14 @@
                 C_AJAX.ajax_post(this_ref._inp.action, data, 
                                 function(success_data){
 
-                                    if( this_ref._inp.popup_message_success  ){
-                                        C_UI.popup_success( this_ref._inp.popup_message_success );
+                                    if( this_ref._inp.popup_message_submit_success  ){
+                                        C_UI.popup_success( this_ref._inp.popup_message_submit_success );
                                     }
                                     this_ref.trigger_custom_event( success_data, 'submit_success');
                                 },
                                 function(fail_data){
                                     if( this_ref._inp.popup_message_fail  ){
-                                        C_UI.popup_fail( this_ref._inp.popup_message_fail );
+                                        C_UI.popup_fail( this_ref._inp.popup_message_submit_fail );
                                     }
                                     this_ref.trigger_custom_event( fail_data, 'submit_failed');
                                 } );
