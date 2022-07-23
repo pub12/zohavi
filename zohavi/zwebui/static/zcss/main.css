@@ -46,8 +46,24 @@ body {
     background: #cfc6c6; 
 }
 
- 
+.v01{   height:  25px; }
+.v02{   height:  50px; }
+.v03{   height:  75px; }
+.v04{   height: 100px; }
+.v05{   height: 125px; }
+.v06{   height: 150px; }
+.v07{   height: 175px; }
+.v08{   height: 200px; }
+.v09{   height: 225px; }
+.v10{   height: 250px; }
+.v11{   height: 275px; }
+.v12{   height: 300px; }
 
+
+.align_elt_right{
+    display: flex;
+    justify-content: flex-end;
+}
 /*
 
 .xxsc_bor_section_height_small{

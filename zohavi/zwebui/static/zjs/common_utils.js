@@ -98,14 +98,21 @@ export class C_UI{
     var data = []
 
     var validation_ok = true; 
-    document.querySelectorAll( selector_search_field ).forEach( function( element, index){ 
-      var result = element.validate();
-      validation_ok = validation_ok & result;
-      data.push( element.get_submit_data()  )
-    });
+    var elt_list = document.querySelectorAll( selector_search_field );
 
-    console.log( `validation complete - ${validation_ok}` );
-    console.log( data );
+    if( elt_list && elt_list.length > 0 ){
+      elt_list.forEach( function( element, index){ 
+        var result = element.validate();
+        validation_ok = validation_ok & result;
+        data.push( element.get_submit_data()  )
+      });
+  
+      console.log( `validation complete - ${validation_ok}` );
+      console.log( data );
+    }else{
+      console.warn( `Could not find elements with querySelector for [${selector_search_field}] to validate form data`)
+    }
+    
 
     if(validation_ok){ return data; }
     return null;

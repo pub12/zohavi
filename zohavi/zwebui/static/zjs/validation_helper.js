@@ -31,12 +31,17 @@
                 if(  rule_name != "optional"){ 
                     var param = req_list_obj[ rule_name ];         
                     ValidationHelper.log( `checking: [${rule_name}] : [${param}]=?=[${value}]`, debug)
-                    // debugger;
-                    if( ! ValidationHelper["validate_"+rule_name](  value , param) ){ 
-                        validation_success = false;
-                       ValidationHelper.log( ' failed 1', debug)
-                        return false; //return on first failure
+                    // debugger; 
+                    if(  Object.getOwnPropertyNames(ValidationHelper).includes( "validate_"+rule_name  ) ){  //see if method existls
+                        if( ! ValidationHelper["validate_"+rule_name](  value , param) ){ 
+                            validation_success = false;
+                           ValidationHelper.log( ' failed 1', debug)
+                            return false; //return on first failure
+                        }
+                    }else{
+                        throw `No such validation rules called ${rule_name} nor validation function ${"validate_"+rule_name}`
                     }
+                    
                 } 
             }
             ValidationHelper.log( ' ret 1:'+ validation_success, debug)

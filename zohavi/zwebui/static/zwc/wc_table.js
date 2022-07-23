@@ -10,7 +10,7 @@
 
 
  
-    class WCTable extends WCFormControl { 
+    export default class WCTable extends WCFormControl { 
         define_template_globals(){
             return `:host{ 
                         --table_header_cell_color: var(--background_cat3_color);
@@ -131,8 +131,8 @@
 
         constructor(){
             super( {"add_row":"", "data=json":"[]", "param=json":"[]", 
-                    "submit_on_add":"",  "submit_on_edit":"",
-                    "popup_message_submit_success":"", "popup_message_submit_fail":"",
+                    "submit_on_add":"",  "submit_on_edit":"", "submit_on_del":"", "submit_hidden_data=json":"",
+                    "popup_messages=json":"",
                     "action_icons=json":'{"edit":"fas fa-edit","delete":"fas fa-trash"}'}, ["columns=json"]); 
             // this.log('hello world')
 
@@ -172,16 +172,16 @@
         }
         //************************************************************************************
         init_modal(columns){
-            // var this_obj = this;
+            var this_obj = this;
             var field_list = []
             // debugger;
             for( var col_index in columns){
                 const elt = columns[col_index ]
-                if( elt.editable == "true"){
+                if( elt.editable == "true" || elt.hidden == "true"){
                     var field_data = {}
-                    field_data.type = ( typeof elt.type  === 'undefined' ? 'input': elt.type );
+                    field_data.type = this_obj._init_modal_get_field_type(elt)
                     field_data.label = elt.col_label;
-                    field_data.id = elt.key;
+                    field_data.id = elt.id;
                     field_data.validation = elt.validation;
 
                     if( "param" in elt){
@@ -190,26 +190,33 @@
                             field_data[ param_field ] = this._inp.param[ param_name  ]
                         }
                     }
-                    
-                    
                     field_list.push( field_data );
                 }
-                
             };
-
-
-
             this.shadowRoot.querySelector('#si_modal').fields = field_list;
         }
 
+        //************************************************************************************
+        _init_modal_get_field_type(elt){
+            if( elt.hidden  == "true" ){ return 'hidden'; }
+            return ( typeof elt.type  === 'undefined' ? 'input': elt.type );    
+        }
+        
         
 
         //************************************************************************************
         //Delete row from table
         delete_row(row_no){
             // debugger
+            var curr_data_row = this._inp.data[ row_no ]
+
             var table_row = this.shadowRoot.querySelector(`tr[data-row_no='${row_no}']`)
             table_row.parentNode.removeChild(table_row);
+            
+            // this.submit_data( this._inp.submit_on_del, curr_data_row )
+            this.submit_data(   this._inp.submit_on_del, curr_data_row, 
+                                this._inp.popup_messages.del_success, 
+                                this._inp.popup_messages.del_fail) 
         }
 
         //************************************************************************************
@@ -240,8 +247,8 @@
 
             var new_event = new CustomEvent( 'table_icon_click', { detail: {this:this, 
                                                                             elt:event.path[1], 
-                                                                            key:event.path[1].dataset['key'], 
-                                                                            id:event.path[1].dataset['value'],
+                                                                            id:event.path[1].dataset['id'], 
+                                                                            value:event.path[1].dataset['value'],
                                                                             row_no:event.path[1].dataset['row_no'],  }}); 
             this.dispatchEvent(new_event , { bubbles:true, component:true} ); 
         }
@@ -251,51 +258,84 @@
         //edit row number (zero index entry)
         edit_row_entry(row_no){
             var curr_data_row = this._inp.data[ row_no ]
+            // debugger;
             this._modal_ref.show( curr_data_row, {'row_no':row_no}, this.callback_row_edited.bind(this) );
             this.log( 'showed modal')
+            
         }
 
         //************************************************************************************
-        submit_data( url, data){
+        submit_data( url, data, success_message, fail_message, callback){
             var this_ref = this
             C_AJAX.ajax_post( url, data, 
                 function(success_data){
-                    if( this_ref._inp.popup_message_submit_success  ){
-                        C_UI.popup_success( this_ref._inp.popup_message_submit_success );
-                    }
+                    if( success_message  ){ C_UI.popup_success( success_message ); }
+                    if( callback ){ callback( success_data ) }
                     this_ref.trigger_custom_event( success_data, 'submit_success');
+                    
                 },
                 function(fail_data){
-                    if( this_ref._inp.popup_message_submit_fail  ){
-                        C_UI.popup_fail( this_ref._inp.popup_message_submit_fail );
-                    }
+                    if( fail_message  ){ C_UI.popup_fail( fail_message ); } 
+                    if( callback ){ callback( fail_data ) }
                     this_ref.trigger_custom_event( fail_data, 'submit_failed');
                 } );
         }
-        //************************************************************************************
-        callback_row_add(action,  ref_data,  new_data){
-            // debugger;
-            // this.log()
-            console.log('adding')
-            console.log( JSON.stringify( new_data) )
-            if( action == this._modal_ref.C_SAVE){ 
 
-                if( this._inp.submit_on_add ){
-                    console.log('submit_on_add')
-                    this.submit_data( this._inp.submit_on_add, new_data )
-                }
+        //** 
+        _submit_data_callback_row_add( ret_data){
+            if( ret_data.success ){  //If return successfully
+                var new_data = [];
+                this._inp.columns.forEach(  function( col){
+                    var item = {}
+                    var db_field_name;
+                    item.id = col.id
+
+                    for (const [key, schema_data] of Object.entries( ret_data.schema )) {
+                        if( item.id in schema_data.fields){
+                            db_field_name = schema_data.fields[ item.id ].field_db;
+                        }
+                    }
+
+                    item.value = ret_data.data[0][ db_field_name ]
+                    new_data.push( item );
+                });
+
                 this._callback_row_add_update_table(new_data);
                 this._callback_row_add_update_data_twin(new_data);
                 this.add_table_row_item_events()
             }
         }
 
-        _callback_row_add_update_data_twin(new_data){
+        //************************************************************************************
+        callback_row_add(action,  ref_data,  new_data){
+            // debugger;
+            // this.log()
+            var full_data = new_data;
+            if( this._inp.submit_hidden_data){ full_data = new_data.concat( this._inp.submit_hidden_data ) }
+            console.log('adding')
+            console.log( JSON.stringify( full_data) )
+            if( action == this._modal_ref.C_SAVE){ 
+
+                if( this._inp.submit_on_add ){
+                    console.log('submit_on_add')
+                    // debugger;
+                    // this.submit_data( this._inp.submit_on_add, full_data
+                    this.submit_data(   this._inp.submit_on_edit, full_data, 
+                                        this._inp.popup_messages.add_success, this._inp.popup_messages.add_fail, 
+                                        this._submit_data_callback_row_add.bind( this) )
+                }
+                
+            }
+        }
+
+        //************************************************************************************
+        _callback_row_add_update_data_twin(submit_data){
             //Update the internal data records
             var inp_new_data_temp = []
-            new_data.forEach( function(elt){
+            submit_data.forEach( function(elt){
+                
                 var new_data_rec = {}
-                new_data_rec['key'] = elt.id
+                new_data_rec['id'] = elt.id
                 new_data_rec['value'] = elt.value
                 if( 'data-value' in elt ){
                     new_data_rec['data-value'] = elt['data-value']    
@@ -305,12 +345,12 @@
             this._inp.data.push( inp_new_data_temp )
         }
         //************************************************************************************
-        _callback_row_add_update_table(new_data){
+        _callback_row_add_update_table(submit_data){
             var table_str = "";
             var tbody_ref = this.shadowRoot.getElementById('si_tbody')
             var new_row_no = tbody_ref.childNodes.length
             //Update the table row
-            table_str += this.init_table_data_row( this._inp.columns, new_data, 'id', new_row_no )
+            table_str += this.init_table_data_row( this._inp.columns, submit_data, 'id', new_row_no )
             tbody_ref.innerHTML = tbody_ref.innerHTML + table_str;
             tbody_ref.childNodes[ new_row_no ].querySelector('.sc_icon_clickable').addEventListener( 'click',  (event)=> this.evt_icon_clicked(event) ); 
         }
@@ -319,25 +359,39 @@
         //edit row number (zero index entry)
         callback_row_edited(action, ref_data, new_data){
             var this_obj = this;
+            var full_data = new_data;
+            if( this._inp.submit_hidden_data){ full_data = new_data.concat( this._inp.submit_hidden_data ) }
              
             if(action == this._modal_ref.C_SAVE ){
-                console.log( JSON.stringify( new_data) )
-                
+                console.log( JSON.stringify( full_data) )
+
+                if( this._inp.submit_on_edit ){
+                    console.log('submit_on_edit')
+                    // debugger;
+                    this.submit_data(   this._inp.submit_on_edit, full_data,
+                                        this._inp.popup_messages.edit_success, 
+                                        this._inp.popup_messages.edit_fail )
+                }
+
                 // var row_elt = this.shadowRoot.querySelectorAll('tr.sck_data_row')[ ref_data['row_no'] ]
-                var row_elt = this.shadowRoot.querySelector(`tr[data-row_no='${ ref_data['row_no'] }']` )
+                var row_elt = this.shadowRoot.querySelector(`tr[data-row_no='${ ref_data['row_no'] }']` ) //find table row entry
                 // 
-                for( const elt_key in new_data){
-                    var data_item = new_data[ elt_key ]
+                for( const elt_key in full_data){ //loop through and udpate values
+                    var data_item = full_data[ elt_key ]
                     var inp_data_fields = this._inp.data[  ref_data['row_no']  ] 
                      
                     for( const input_data_key  in inp_data_fields){
-                        if( inp_data_fields[ input_data_key ].key == new_data[ elt_key ].id ){
-                            inp_data_fields[ input_data_key ].value = new_data[ elt_key ].value 
+                        if( inp_data_fields[ input_data_key ].id == full_data[ elt_key ].id ){
+                            inp_data_fields[ input_data_key ].value = full_data[ elt_key ].value 
                         }
                     };
                     
-                    row_elt.querySelector('.' + data_item.id ).innerHTML = data_item.display_value;
-                    row_elt.querySelector('.' + data_item.id ).dataset['value'] = data_item.value;
+                    var html_elt = row_elt.querySelector('.' + data_item.id )  
+                    if(html_elt){   //If this is a default hidden field from [submit_hidden_data] tehre may not be an html element
+                        html_elt.innerHTML = data_item.display_value;
+                        html_elt.dataset['value'] = data_item.value;
+                    }
+                    
                 };
                 
             }
@@ -375,7 +429,7 @@
             var this_obj = this;
             // debugger
             data.forEach( function( data_row, row_no ){
-                table_str += this_obj.init_table_data_row( this_obj._inp.columns, data_row, 'key', row_no )
+                table_str += this_obj.init_table_data_row( this_obj._inp.columns, data_row, 'id', row_no )
             });
             this.shadowRoot.getElementById('si_tbody').innerHTML = table_str; 
             this.add_table_row_item_events()
@@ -395,12 +449,13 @@
             
             row_str += ">"
             cols.forEach( function( col){
-                var data_cell = C_UTIL.search_list_dict_key_value( row_data, key_field_name , col[ 'key' ] );
-
+                var data_cell = C_UTIL.search_list_dict_key_value( row_data, key_field_name , col[ 'id' ] );
+                
                 row_str += `<td `
                 row_str += this_obj.add_attribute( 'width', col )
                 row_str += `data-row_no="${row_no}" `
-
+                
+                if( col['hidden'] ){  row_str += ' style="display:none;" ' }
                 if( data_cell ){  //in case this is a static cell - 
                     if( 'data-value' in data_cell){ row_str += `data-value="${ data_cell['data-value'] }"`
                     }else{  row_str += `data-value="${ data_cell['value']}"` }    
@@ -414,13 +469,13 @@
 
 
                 //set background color
-                if(  String( col['key_cell']).toLowerCase() == 'true'){ row_str += `class="sc_cell_bg_key_color" ` }
+                if(  String( col['key_field']).toLowerCase() == 'true'){ row_str += `class="sc_cell_bg_key_color" ` }
                 row_str += '>'
 
                 if( col['type'] == 'actions'){
                     row_str += this_obj._init_table_cell_add_actions( col,  row_no );
                 }else if( data_cell ){
-                    row_str += this_obj.shadowRoot.querySelector('#si_modal').get_field_display_value(data_cell.key,data_cell.value)
+                    row_str += this_obj.shadowRoot.querySelector('#si_modal').get_field_display_value(data_cell.id,data_cell.value)
                 } 
                 row_str += '</td>'
             });
@@ -463,8 +518,11 @@
             var this_obj = this;
             columns.forEach( function( elt){
                 table_str += `<th `;
-                table_str += this_obj.add_table_attrb_class_list( elt, ['class', 'key'] )
+                table_str += this_obj.add_table_attrb_class_list( elt, ['class', 'id'] )
                 table_str += this_obj.add_attribute( 'width', elt );
+
+                if( elt['hidden'] ){  table_str += ' style="display:none;" ' }
+
                 table_str += `>${elt.col_label}</th>`; 
             });
             table_str += `</tr>`;

@@ -4,7 +4,18 @@ from flask import url_for
 
 from zohavi.zcommon import Utils
 
+
+##############################################################################################################
+
+
 class JCFunc:
+
+	def load_template_funcions(jinja_env):
+		for method in dir(JCFunc):
+			if method.startswith('__') is False:
+				jinja_env.globals[ 'jc_' + method] = getattr(JCFunc, method)
+
+
 	######################################################################################################
 	# Test function
 	def test():
@@ -18,7 +29,31 @@ class JCFunc:
 
 	def breakpoint(data):
 		breakpoint()
-		
+
+	######################################################################################################
+	# Helper function 
+	def dict_to_json_str(inp_dict, field_list):
+		ret_json = {}
+
+		for field in field_list:
+			if field in inp_dict: ret_json[field] = inp_dict[field]
+
+		return json.dumps( ret_json )
+		# pass
+
+	######################################################################################################
+	# Helper function 
+	def list_dict_to_json_str(inp_list, field_list):
+		ret_json = []
+
+		for item in inp_list:
+			item_dict = {}
+			for field in field_list:
+				if field in item: item_dict[field] = item[field]
+			if item_dict: ret_json.append( item_dict )
+
+		return json.dumps( ret_json )
+		# pass
 	
 	######################################################################################################
 	# Take an existing list or dict, and then convert the field names from A to B

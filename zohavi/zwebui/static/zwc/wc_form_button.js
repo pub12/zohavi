@@ -42,15 +42,20 @@
         //Setup the defaults and events
         connectedCallback(){     
             super.connectedCallback(); 
-
             var this_ref = this
-            if( this_ref._inp.submit_data_selector && this_ref._inp.action ){
-                // console.log('adding click event')
-                this.shadowRoot.querySelector('#si_field').addEventListener('click', function(event){  
+            // debugger;
+            //send out the button click
+            this.shadowRoot.querySelector('#si_field').addEventListener('click', function( event ){
+
+                if( this_ref._inp.submit_data_selector && this_ref._inp.action ){   //send submit
                     this_ref.submit_data(event);
-                });
-            }
-            // debugger
+                }
+
+                //finally send out own event if required
+                const custom_event = new CustomEvent( 'wc_click', { detail: {this:this_ref }});
+                this_ref.dispatchEvent(custom_event , { bubbles:true, component:true } ); 
+            });
+            
         }
 
         init_component(){
@@ -58,10 +63,22 @@
         }
 
         //************************************************************************************
+        validate_attributes(){
+            if( this._inp.submit_data_selector && ! this._inp.action ){   //send submit
+                throw `Input Attribute error: Provided "submit_data_selector" but must be paired with "action" to see where to submit to` 
+            }
+
+            if( !this._inp.submit_data_selector && this._inp.action ){   //send submit
+                throw `Input Attribute error: Provided "action" but must be paired with "submit_data_selector" to see what to validate`
+            }
+        }
+
+        //************************************************************************************
         //Fill out the option list
         submit_data(e){ 
             var this_ref = this
             console.log( 'submitting' );
+            // debugger;
             var data = C_UI.get_validated_wc_form_data(  this._inp.submit_data_selector ) 
             if( data ){  
                 this._inp.action = this._inp.action  //get latest action setting
@@ -77,7 +94,8 @@
                                     this_ref.trigger_custom_event( success_data, 'submit_success');
                                 },
                                 function(fail_data){
-                                    if( this_ref._inp.popup_message_fail  ){
+                                    console.log('failed to submit')
+                                    if( this_ref._inp.popup_message_submit_fail  ){
                                         C_UI.popup_fail( this_ref._inp.popup_message_submit_fail );
                                     }
                                     this_ref.trigger_custom_event( fail_data, 'submit_failed');

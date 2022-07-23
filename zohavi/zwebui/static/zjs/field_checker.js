@@ -190,10 +190,13 @@ export  class FieldChecker  {
         // if( field_name =='header_on'){ debugger; }
         switch(type){
             case 'bool': 
-                ret_value = ( orig_value == 'true' ||orig_value == true ? true :false ); 
+                ret_value = ( orig_value == 'True' || orig_value == 'true' ||orig_value == true ? true :false ); 
                 break;
             case 'int': 
                 ret_value =  parseInt(orig_value); 
+                break;
+            case 'array': 
+                ret_value =  orig_value.split(','); 
                 break;
             case 'json': 
                 if(orig_value){

@@ -76,8 +76,15 @@
                 
                 menu_items_str += `<ul class="menu-list " >`; 
 
+                console.log( `Disable All ${ JSON.stringify(this_obj.menu_obj.wc_inp_data.sbar_disable_menu_list )}`)
+
                 section["menus"].forEach( function( menu, index){
-                    menu_items_str += this_obj._sidebar_full_item_renderer_menu(this_obj, menu )
+                    console.log( `checking ${menu['id']}`)
+                    if( ! this_obj.menu_obj.wc_inp_data.sbar_disable_menu_list.includes( menu['id'] ) ){    //skip if not in the disable list
+                        console.log( ` ${menu['id']} ok`)
+                        menu_items_str += this_obj._sidebar_full_item_renderer_menu(this_obj, menu )
+                    }
+                    
                 });
 
                 menu_items_str += '</ul>';
@@ -91,7 +98,7 @@
             var icon_str = "";
             var menu_active_class = ""; 
             var menu_items_str = "";
-            
+             
             "icon" in menu && menu["icon"] ? icon_str = `<i class="${menu["icon"]} sck_sbar_icon"></i>` : icon_str = "";
 
             menu_active_class = ""; 
@@ -100,28 +107,47 @@
             }
             
             if( "sub_menu" in menu){
-                menu_items_str += `<li><a href="#" class="sc_sbar_menu_item sck_menu_item_text ${menu_active_class} sc_sidebar_menu_has_submenu">` +
-                               `${icon_str} ${menu["title"]} `
-                menu_items_str += '<span class="sc_menu_item_arrow"><i class="fas fa-chevron-right sck_sbar_submenu_icon"></i></span></a>';
-                menu_items_str += `<ul class="sc_sbar_submenu is-hidden" >`;
-                menu["sub_menu"].forEach( function( sub_menu, index){
-                    menu_items_str += `<li id="${sub_menu["id"]}"><a  href="${sub_menu["link"]}" class="sc_sbar_menu_item ">`;
-                    
-                    if( sub_menu["active"] == "true"  || this_obj.menu_obj.wc_inp_data.sbar_active_menu_item == sub_menu["id"]  ){
-                        menu_items_str += `<span class="sck_submenu_item_bullet sc_sbar_submenu_is_active_bullet"></span>` +
-                                          `<span class="sck_submenu_item_text sc_sbar_submenu_is_active_text">`;
-                    }else{
-                        menu_items_str += `<span class="sck_submenu_item_bullet"></span>` +
-                                          `<span class="sck_submenu_item_text">`;
-                    }                                              
-                    menu_items_str += `${sub_menu["title"]}</span></a></li>`;
-                });
-                menu_items_str += '</ul>';
+                menu_items_str += this_obj._sidebar_full_item_renderer_menuitem_with_submenu(this_obj, menu, icon_str, menu_active_class )
             }else{
                 menu_items_str += `<li id="${menu["id"]}"><a href="${menu["link"]}" class="sc_sbar_menu_item ${menu_active_class}">` +
                                `${icon_str} <span class="sck_menu_item_text">${menu["title"]}</span> </a>`;
             }
             menu_items_str += '</li>'
+            return menu_items_str;
+        }
+
+        //**********************************************************************************************
+        _sidebar_full_item_renderer_menuitem_with_submenu(this_obj, menu, icon_str, menu_active_class ){
+            var menu_items_str = "";
+            var menu_sub_item_str = "";
+            var sub_menu_active = false;
+            menu["sub_menu"].forEach( function( sub_menu, index){
+
+                if( ! this_obj.menu_obj.wc_inp_data.sbar_disable_menu_list.includes( sub_menu['id'] ) ){    //skip if not in the disable list
+
+                    menu_sub_item_str += `<li id="${sub_menu["id"]}"><a  href="${sub_menu["link"]}" class="sc_sbar_menu_item ">`;
+                    
+                    if( sub_menu["active"] == "true"  || this_obj.menu_obj.wc_inp_data.sbar_active_menu_item == sub_menu["id"]  ){
+                        sub_menu_active = true;
+                        menu_sub_item_str += `<span class="sck_submenu_item_bullet sc_sbar_submenu_is_active_bullet"></span>` +
+                                            `<span class="sck_submenu_item_text sc_sbar_submenu_is_active_text">`;
+                    }else{
+                        menu_sub_item_str += `<span class="sck_submenu_item_bullet"></span>` +
+                                            `<span class="sck_submenu_item_text">`;
+                    }                                              
+                    menu_sub_item_str += `${sub_menu["title"]}</span></a></li>`;
+                }
+            });
+            
+            menu_items_str += `<li><a href="${menu["link"]}" class="sc_sbar_menu_item sck_menu_item_text ${menu_active_class} mr-0 pr-1" style="display: inline-block;">`
+            menu_items_str += `          ${icon_str} ${menu["title"]} </a>`;
+            menu_items_str += `     <a href="#" class="sc_sidebar_menu_has_submenu ml-0 pl-1" style="display: inline;">`
+            menu_items_str += `             <span class="sc_menu_item_arrow">`
+            menu_items_str += `                     <i class="fas ${ sub_menu_active ? 'fa-chevron-down':'fa-chevron-right'}  sck_sbar_submenu_icon"></i></span></a>`;
+            menu_items_str += `<ul class="sc_sbar_submenu ${ sub_menu_active ?'':'is-hidden'} " >`; //if sub-menu active then dont show as hidden
+            menu_items_str += menu_sub_item_str;
+            menu_items_str += '</ul>';
+
             return menu_items_str;
         }
 

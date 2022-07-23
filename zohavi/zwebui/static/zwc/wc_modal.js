@@ -3,6 +3,7 @@
     import WCFormControl from  "/webui/static/zwc/wc_form_main.js" 
     import WCCheckbox from "/webui/static/zwc/wc_form_checkbox.js"
     import WCFormInput from  "/webui/static/zwc/wc_form_input.js" 
+    import WCFormHidden from  "/webui/static/zwc/wc_form_hidden.js" 
     import WCSelect from  "/webui/static/zwc/wc_form_select.js" 
     import {FieldChecker, 
             FieldChecker_Extractor_Dict} from '/webui/static/zjs/field_checker.js'
@@ -20,23 +21,36 @@
         // get_src(){ throw 'Abstract - must be mplemented'}
     }
 
-    //********************************************************************************
+   //********************************************************************************
     //Check fields for INPUT
     class WCDispatch_Input extends WCDispatcher{
         constructor(inp_obj, field_id){ 
             super( new FieldChecker( {"id":field_id, "label":"", "validation":"", "message_err":"", "value":""}, [], 
-                   new FieldChecker_Extractor_Dict( inp_obj ) )  );
-            
+                   new FieldChecker_Extractor_Dict( inp_obj ) )  );   
         }
-
         get_html(json){
-            // debugger;
             var validation ="";
             if( this._inp.validation){ validation = JSON.stringify(this._inp.validation); }
             return `<wc-input-text id="${this._inp.id}" class="sck_grp_modal_field" 
                                     label="${this._inp.label}" validation='${ validation }' 
                                     message_err="${this._inp.message_err}" value='${this._inp.value}' >
                     </wc-input-text>`
+        }
+    }
+
+    //********************************************************************************
+    //Check fields for INPUT HIDDEN
+    class WCDispatch_Hidden extends WCDispatcher{
+        constructor(inp_obj, field_id){ 
+            super( new FieldChecker( {"id":field_id, "label":"" , "value":""}, [], 
+                   new FieldChecker_Extractor_Dict( inp_obj ) )  );   
+        }
+        get_html(json){
+            var validation ="";
+            if( this._inp.validation){ validation = JSON.stringify(this._inp.validation); }
+            return `<wc-input-hidden id="${this._inp.id}" class="sck_grp_modal_field" 
+                                    label="${this._inp.label}" value='${this._inp.value}' >
+                    </wc-input-hidden>`
         }
     }
 
@@ -137,6 +151,7 @@
 
             this.components = {
                                 'input':   WCDispatch_Input ,
+                                'hidden':   WCDispatch_Hidden ,
                                 'select':   WCDispatch_Select ,
                                 'checkbox': WCDispatch_Checkbox 
             }
@@ -212,10 +227,11 @@
             if( data_rows){
                 data_rows.forEach( function(elt){
 
-                    var col_field = C_UTIL.search_list_dict_key_value( this_obj._inp.fields, 'id' , elt.key  );  //find the original column ref
-                    var node = this_obj.shadowRoot.getElementById( elt.key );
+                    var col_field = C_UTIL.search_list_dict_key_value( this_obj._inp.fields, 'id' , elt.id  );  //find the original column ref
+                    var node = this_obj.shadowRoot.getElementById( elt.id );
                     if(node){ 
                         node.value = elt.value 
+                        node.setAttribute("value", elt.value )  //set attribute as well so you can see on html side
                         if( elt.validation ){ 
                             node.validation = elt.validation    //Get the over ride validation
                         }else{
@@ -259,7 +275,8 @@
             var data = []
             var validation_ok = true;
             this.shadowRoot.querySelectorAll('.sck_grp_modal_field').forEach( function(elt){
-                validation_ok = validation_ok & elt.validate();
+                // if( typeof elt.validation !== 'undefined'){ 
+                validation_ok = validation_ok & elt.validate(); 
                 data.push( elt.get_submit_data() );
             });
 

@@ -193,6 +193,7 @@
         }
 
         get value(){
+            // console.log('##getting value:' + this.shadowRoot.getElementById('si_field').value)
             return this.shadowRoot.getElementById('si_field').value;
         }
 

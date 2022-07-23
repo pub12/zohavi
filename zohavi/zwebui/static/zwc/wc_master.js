@@ -23,12 +23,9 @@ import {FieldChecker,
         
         // this.check_required_fields( this.getAttributeNames(), optional_attrib_dict, mandatory_attrib_list, this.constructor.name );   //check that mandatory fields given
         // this.capture_defaults( optional_attrib_dict, mandatory_attrib_list );   //Save default param values to _def;
+        this.process_attributes(optional_attrib_dict, mandatory_attrib_list)
+
         
-        this.field_checker = new FieldChecker( optional_attrib_dict, mandatory_attrib_list, new FieldChecker_Extractor_WC(this) )
-        this.field_checker.check_required_fields();   //check that mandatory fields given
-        this._orig_inp = this.field_checker.get_dict(); 
-        this._inp = Object.assign({}, this._orig_inp ); 
- 
 
         this._debug = false 
         
@@ -40,10 +37,26 @@ import {FieldChecker,
         this.shadowRoot.appendChild( this.template.content.cloneNode(true)); 
     }
 
+    //************************************************************************************
+    process_attributes(optional_attrib_dict, mandatory_attrib_list){
+        this.field_checker = new FieldChecker( optional_attrib_dict, mandatory_attrib_list, new FieldChecker_Extractor_WC(this) )
+        this.field_checker.check_required_fields();   //check that mandatory fields given
+
+        this._orig_inp = this.field_checker.get_dict(); 
+        this._inp = Object.assign({}, this._orig_inp ); 
+        
+        // this.validate_attributes()  //furtehr validation on fields
+    }
     
+    //************************************************************************************
     convert_field(field_name, value){
         return this.field_checker.convert_field( field_name, value )
     }
+
+    //************************************************************************************
+    //Add validation
+    // validate_attributes(){
+    // }
 
     //************************************************************************************
     //Setup the defaults and events
@@ -53,7 +66,7 @@ import {FieldChecker,
             item.addEventListener( 'click',  (event)=> this.field_event_dispatch(event, 'click') );
         });
 
-        this.log('initing components')
+        // this.log('initing components')
         this.init_component();
  
     } 

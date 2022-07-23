@@ -6,7 +6,7 @@
     // var wc_form_ref_instance = customElements.get('wc-form-main');
     
 
-    class WCRadioButton extends WCFormControl { 
+    export default class WCRadioButton extends WCFormControl { 
         define_template(){
             return  ` 
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">

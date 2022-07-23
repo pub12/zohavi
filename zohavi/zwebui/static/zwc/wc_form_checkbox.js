@@ -29,6 +29,8 @@
 
             // this.init_defaults();
             // console.log('init checkbox')
+            // console.log('create checkbox')
+            // this.debug=true 
         } 
 
 
@@ -44,6 +46,7 @@
             } 
 
             this.render_panels();
+            
         }
 
         evt_toggle_target(event){
@@ -55,14 +58,24 @@
             const elt_when_off = document.getElementById(this._inp.target_when_off )
             // debugger;
             if( this.value ){
-                    if( elt_when_on ){ elt_when_on.show(); }
-                    if( elt_when_off){ elt_when_off.hide(); }
+                    if( elt_when_on ){ elt_when_on.show(); } 
+                    if( elt_when_off){ elt_when_off.hide(); } 
             }
 
             if( !this.value  ){
                     if( elt_when_off) { elt_when_off.show(); }
                     if( elt_when_on){ elt_when_on.hide(); }
             }
+
+            if( this._inp.target_when_on && !elt_when_on){      //could not find the element
+                console.warn( `Could not find elt id:${this._inp.target_when_on} from checkbox [${this.id}]`)
+                // debugger;
+            }
+
+            if( this._inp.target_when_off && !elt_when_off){      //could not find the element
+                console.warn( `Could not find elt id:${this._inp.target_when_on} from checkbox [${this.id}]`)
+            }
+
         }
 
     
@@ -73,6 +86,7 @@
         }
 
         get value(){
+            // console.log('##getting value:' + this.shadowRoot.getElementById('si_field').value)
             return this.shadowRoot.getElementById('si_field').checked;
         }
 
@@ -81,6 +95,7 @@
             this.shadowRoot.getElementById('si_field').setAttribute("checked", new_value); 
             this.setAttribute("value", new_value)
             this._inp.value = new_value
+            this.render_panels()
         }
 
          

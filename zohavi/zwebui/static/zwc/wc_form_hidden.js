@@ -6,7 +6,7 @@
     
 
     var wc_form_ref_instance = customElements.get('wc-form-main');
-    class WCHidden extends WCFormControl { 
+    export default class WCHidden extends WCFormControl { 
         define_template(){
             return  ` 
             <div class="field">

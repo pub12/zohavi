@@ -26,7 +26,7 @@
 
     //#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
     //#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-    class WCNav extends WCMaster { 
+    export default class WCNav extends WCMaster { 
         define_template_globals(){
             return `:host{
                         --sbar_full_width: [placeholder::sbar_full_width_px]px;
@@ -251,7 +251,7 @@
                                 <span>
                                     <img src="" id="si_sbar_log" width="112" height="28" alt="" class="p-3 ">
                                 </span>
-
+  
                             </div> 
                             <div class="sc_sbar_menu_area  "  >
                                 
@@ -333,7 +333,7 @@
                     "sbar_renderer":"full", "sbar_visibility":"always-on", "sbar_content_area":"push", 
                     "sbar_color": getComputedStyle(document.body).getPropertyValue('--background_cat1_color') ,
                     "header_renderer":"def", "header_visibility":"always-on", "header_content_area":"push", "header_color": 'green',
-                    "sbar_active_menu_item":"", "header_active_menu_item":"", "sbar_disable_menu_list":"", "header_disable_menu_list":""
+                    "sbar_active_menu_item":"", "header_active_menu_item":"", "sbar_disable_menu_list=array":"", "header_disable_menu_list":""
                      }, 
                     ["main_div_selector"]); 
             // debugger;

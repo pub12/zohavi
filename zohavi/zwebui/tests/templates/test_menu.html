@@ -15,9 +15,9 @@
             sbar_color = 'grey' 
             sbar_renderer = 'full'
             sbar_visibility = 'always-on'
-            sbar_full_width_px='200' 
-            sbar_active_menu_item = '{{sbar_active_menu_item}}'
-            sbar_disable_menu_list ='{{sbar_disable_menu_list}}'
+            sbar_full_width_px='250' 
+            sbar_active_menu_item = 'i_submenu_prj_overview'
+            sbar_disable_menu_list ='i_submenu_env_config2'
             sbar_menu_list = '[
                         { 
 
@@ -26,38 +26,41 @@
                                     "id":"i_submenu_prj_overview",
                                     "link": "ABC"},	
 
+                                    {"title": "2. Env. Overview 2", 
+                                    "id":"i_submenu_env_config2",
+                                    "icon": "fas fa-industry",
+                                    "link": "ABC"},	
+
+
                                     {"title": "2. Env. Overview", 
                                     "id":"i_submenu_env_config",
                                     "icon": "fas fa-industry",
-                                    "link": "https://www.google.com"
                                     
-                                        },
+                                    
 
-                                    {"title": "3. Dev:" ,
-                                    "id":"i_submenu_dev",
-                                    "icon": "fas fa-envelope",
-                                    "link": "ABC",
+                                    "link": "https://www.google.com",
                                     "sub_menu":[
-                                                    {"title": "Sys",
-                                                    "id":"i_submenu_dev_sys",
-                                                    "link": ""},
-                                                    {"title": "App", 
-                                                    "id":"i_submenu_dev_app",
-                                                    "link": "ABC"}
-                                                ]
-                                    },
-                                    {"title": "4. Prod", 
-                                    "icon": "fas fa-industry",
-                                    "id":"i_submenu_prod",
-                                    "link": "ABC",
-                                    "sub_menu":[
-                                                    {"title": "Sys",
+                                                      {"title": "Sys",
+                                                      
+                                                      "id":"i_submenu_dev_sys",
+                                                      "link": ""},
+
+                                                      {"title": "App", 
+                                                      "id":"i_submenu_dev_app",
+                                                      "link": "ABC"},
+
+                                                      {"title": "Sys",
                                                     "id":"i_submenu_prod_sys",
                                                     "link": "ABC"},
+
                                                     {"title": "App", 
                                                     "id":"i_submenu_prod_app",
                                                     "link": "ABC"}
-                                                ]
+                                                
+                                                  ]
+                                      
+                                        
+                                                    
                                     } 
                                 ]
                         }

@@ -2,7 +2,7 @@
     import WCMaster from  '/webui/static/zwc/wc_master.js' ;
     // import WCPanel from   '/webui/static/zwc/wc_panel.js' ;
 
-       class WCTab extends WCMaster  { 
+       export default class WCTab extends WCMaster  { 
         define_template(){
             return super.define_template() + `
                     <div class=" tabs is-boxed pt-2">
@@ -138,14 +138,13 @@
             this.shadowRoot.querySelector('#si_field').classList.remove('is-hidden');
 
             //trigger event that panel is shown
-            console.log("trigger panel appear [0]:" + this.id )
+            // console.log("trigger panel appear [0]:" + this.id )
             // console.log( this.id )
             const event = new CustomEvent('panel_appear', { detail: {this:this  }} );
             // this.dispatchEvent(event , { bubbles:true, component:true} ); 
             this.dispatchEvent(event , {bubbles:true,component:true } ); 
-            console.log("trigger panel appear [1]:" + this.id )
+            // console.log("trigger panel appear [1]:" + this.id )
         }
-
     }
 
     // var ver = 1

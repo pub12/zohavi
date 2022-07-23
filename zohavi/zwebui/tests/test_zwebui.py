@@ -16,17 +16,18 @@ from zohavi.zwebui.data_ui_model import DataUIModel
 
 
 logger = MCLogger( 'test_log.txt' )
+
 site_update_schema = {
-							"SiteMain":{ 	
+							"SiteMain":[{ 	
 								"module_name":"test_zwebui",
 								"table_obj": "SiteMain",
 								"fields":{
 											"si_site_id":{"field_db":"id",   "key":True},
-											"si_site_name":{"field_db":"site_name", "validation":{"required":True, "text_min_len":3, "text_max_len":20} },
-											"si_site_code":{"field_db":"site_code", "validation":{"required":True,  "text_max_len":5} },
-											"si_site_desc":{"field_db":"site_desc", "validation":{"required":False,  "text_max_len":200} }
+											"si_site_name":{"field_db":"si_site_name", "validation":{"required":True, "text_min_len":3, "text_max_len":20} },
+											"si_site_code":{"field_db":"si_site_code", "validation":{"required":True,  "text_max_len":5} },
+											"si_site_desc":{"field_db":"si_site_desc", "validation":{"required":False,  "text_max_len":200} }
 								}
-							}
+							}]
 					}
 
 from sqlalchemy import Column, Integer, String 
@@ -80,50 +81,95 @@ class TestCore(unittest.TestCase):
 
 	########################################################################
 	# Test creating a class
-	def test_0010_create_instance(self):
-		data_ui = DataUIModel( ['SiteMain'], site_update_schema  , self.session, logger ) 
-		self.assertTrue( data_ui )
+	def test_0001_validate_schema(self):
+		validate_schema = {
+							"SiteMain":[{ 	
+								"module_name":"test_zwebui",
+								"table_obj": "SiteMain",
+								"fields":{
+											"si_site_id":{"field_db":"id",   "key":True},
+											"si_site_name":{"field_db":"si_site_name", "validation":{"required":True, "text_min_len":3, "text_max_len":20} },
+											"si_site_code":{"field_db":"si_site_code", "validation":{"required":True,  "text_max_len":5} },
+											"si_site_desc":{"field_db":"si_site_desc", "validation":{"required":False,  "text_max_len":200} }
+								}
+							}]
+					}
+
+		self.assertTrue(  DataUIModel.validate_schema( validate_schema["SiteMain"] )  )
+		
+
+
+
+	########################################################################
+	# Test creating a class
+	# def test_0010_create_instance(self):
+	# 	data_ui = DataUIModel( site_update_schema['SiteMain']  , self.session, logger ) 
+	# 	self.assertTrue( data_ui )
  		
-	########################################################################
-	# Test getting field info
-	def test_0020_get_field_schema(self):
-		data_ui = DataUIModel( ['SiteMain'], site_update_schema  , self.session, logger ) 
+# 	########################################################################
+# 	# Test getting field info
+# 	def test_0020_get_field_schema(self):
+# 		data_ui = DataUIModel( site_update_schema['SiteMain']  , self.session, logger ) 
 
-		site_name = data_ui.get_field_schema('SiteMain', "si_site_name")
-		print( site_name )
-		self.assertTrue( site_name )
+# 		site_name = data_ui.get_field_schema('SiteMain', "si_site_name")
+# 		print( site_name )
+# 		self.assertTrue( site_name )
 
-	########################################################################
-	# Test updating fieleds
-	def test_0030_update_record(self):
-		data_ui = DataUIModel( ['SiteMain'], site_update_schema  , self.session, logger ) 
-		json_update = 	[
-							{ "id":"si_site_id", "value":""},
-							{ "id":"si_site_name", "value":"abc1"},
-							{ "id":"si_site_desc", "value":"abc2"},
-							{ "id":"si_site_code", "value":"abc3"}
-						]
-		ret_data = data_ui.data_update_ajax( json_update )
+# 	########################################################################
+# 	# Test updating fieleds
+# 	def test_0025_create_record(self):
+# 		data_ui = DataUIModel( site_update_schema['SiteMain']  , self.session, logger ) 
+# 		json_update = 	[
+# 							{ "id":"si_site_id", "value":""},
+# 							{ "id":"si_site_name", "value":"abc1"},
+# 							{ "id":"si_site_desc", "value":"abc2"},
+# 							{ "id":"si_site_code", "value":"abc3"}
+# 						]
+# 		ret_data = data_ui.data_update_ajax( json_update )
 
-		item = self.session.query( SiteMain).filter_by( site_name='abc1' ).first()
-		self.assertEquals( ret_data[1], 200  )
-		self.assertTrue( item  )
+# 		item = self.session.query( SiteMain).filter_by( site_name='abc1' ).first()
+# 		self.assertEquals( ret_data[1], 200  )
+# 		self.assertTrue( item  )
 
-	########################################################################
-	# Test updating fieleds but iwht missing fields
-	def test_0040_update_record_with_missing_fields(self):
-		data_ui = DataUIModel( ['SiteMain'], site_update_schema  , self.session, logger ) 
-		json_update = 	[
-							#{ "id":"si_site_id", "value":""}, <--- omit to test failures
-							# { "id":"si_site_name", "value":"abc1"},
-							# { "id":"si_site_desc", "value":"abc2"},
-							# { "id":"si_site_code", "value":"abc3"}
-						]
-		ret_data = data_ui.data_update_ajax( json_update )
-		item = self.session.query( SiteMain).filter_by( site_name='abc1' ).first()
-		self.assertEquals( ret_data[1], 500  )
-		self.assertFalse( item  )
 
-	########################################################################
-	# Test updating fieleds but iwht missing fields
+# 	########################################################################
+# 	# Test updating fieleds
+# 	def test_0030_update_record(self):
+# 		data_ui = DataUIModel( site_update_schema['SiteMain']  , self.session, logger ) 
+# 		json_update = 	[
+# 							{ "id":"si_site_id", "value":""},
+# 							{ "id":"si_site_name", "value":"abc1"},
+# 							{ "id":"si_site_desc", "value":"abc2"},
+# 							{ "id":"si_site_code", "value":"abc3"}
+# 						]
+# 		ret_data = data_ui.data_update_ajax( json_update )
+
+# 		item = self.session.query( SiteMain).filter_by( site_name='abc1' ).first()
+# 		self.assertEquals( ret_data[1], 200  )
+# 		self.assertTrue( item  )
+
+# 	########################################################################
+# 	# Test updating fieleds but iwht missing fields
+# 	def test_0040_update_record_with_missing_fields(self):
+# 		data_ui = DataUIModel( site_update_schema['SiteMain']  , self.session, logger ) 
+# 		json_update = 	[
+# 							#{ "id":"si_site_id", "value":""}, <--- omit to test failures
+# 							# { "id":"si_site_name", "value":"abc1"},
+# 							# { "id":"si_site_desc", "value":"abc2"},
+# 							# { "id":"si_site_code", "value":"abc3"}
+# 						]
+# 		ret_data = data_ui.data_update_ajax( json_update )
+# 		item = self.session.query( SiteMain).filter_by( site_name='abc1' ).first()
+# 		self.assertEquals( ret_data[1], 500  )
+# 		self.assertFalse( item  )
+
+# 	########################################################################
+# 	# Test updating fieleds but iwht missing fields
 	
+
+#  #################################################################
+#  #################################################################
+
+
+if __name__ == '__main__':
+    unittest.main()
