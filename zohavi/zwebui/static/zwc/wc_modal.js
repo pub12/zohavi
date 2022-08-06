@@ -73,7 +73,7 @@
         }
 
         convert_int_to_ext_value(internal_value){  
-            if( internal_value in this._inp.list){
+            if( this._inp.list && internal_value in this._inp.list){
                 return this._inp.list[ internal_value ];
             }
             return internal_value;

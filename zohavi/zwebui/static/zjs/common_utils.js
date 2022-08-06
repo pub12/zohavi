@@ -132,7 +132,7 @@ export class C_UI{
   //************************************************************************************
   //scroll to top of a field
   static popup_fail(message){
-    Swal.fire({ icon: 'error', title: message , showConfirmButton: false, timer: 1500 },
+    Swal.fire({ icon: 'error', title: message , showConfirmButton: false, timer: 7500 },
             function (isConfirm) {
                 if (isConfirm) {
                     return true;

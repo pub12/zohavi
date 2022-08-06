@@ -47,7 +47,7 @@
             //send out the button click
             this.shadowRoot.querySelector('#si_field').addEventListener('click', function( event ){
 
-                if( this_ref._inp.submit_data_selector && this_ref._inp.action ){   //send submit
+                if( this_ref._inp.action ){   //send submit
                     this_ref.submit_data(event);
                 }
 
@@ -77,50 +77,67 @@
         //Fill out the option list
         submit_data(e){ 
             var this_ref = this
-            console.log( 'submitting' );
+            var read_to_submit = false  
+            
+            if( this_ref._inp.submit_data_selector ){
+                var data = C_UI.get_validated_wc_form_data(  this._inp.submit_data_selector ) 
+                if( data ){  read_to_submit = true; }
+            }else{
+                read_to_submit = true;
+            }
+            
             // debugger;
-            var data = C_UI.get_validated_wc_form_data(  this._inp.submit_data_selector ) 
-            if( data ){  
+            // var data = C_UI.get_validated_wc_form_data(  this._inp.submit_data_selector ) 
+            if( read_to_submit ){  
                 this._inp.action = this._inp.action  //get latest action setting
                 this_ref.log( 'submitt to url : ' + this._inp.action + '::' + JSON.stringify( data ) );
 
-
                 C_AJAX.ajax_post(this_ref._inp.action, data, 
                                 function(success_data){
-
                                     if( this_ref._inp.popup_message_submit_success  ){
                                         C_UI.popup_success( this_ref._inp.popup_message_submit_success );
                                     }
                                     this_ref.trigger_custom_event( success_data, 'submit_success');
                                 },
                                 function(fail_data){
-                                    console.log('failed to submit')
+                                    console.log( `Failed to submit::`)
+                                    console.log( JSON.stringify(fail_data) )
                                     if( this_ref._inp.popup_message_submit_fail  ){
-                                        C_UI.popup_fail( this_ref._inp.popup_message_submit_fail );
+                                        var field_err = this_ref.failed_submit_render_error_field_message( fail_data , this_ref._inp.submit_data_selector)
+                                        C_UI.popup_fail( this_ref._inp.popup_message_submit_fail +":\n" + field_err );
                                     }
                                     this_ref.trigger_custom_event( fail_data, 'submit_failed');
                                 } );
-                                
-
-                //     url, dict_data, success_func=null, fail_func=null, debug=false){ 
-                // // debugger;
-                // fetch(  this_ref._def.action , { 
-                //     method: "POST",
-                //     headers: { "Content-Type": "application/json" },
-                //     body:  JSON.stringify( data )
-                // })
-                // .then(function(response){  
-                //     this_ref.log( response);
-                //     return response; 
-                // })
-                // .then(function(data){   
-                //     this_ref.trigger_custom_event( data, 'submit_success');
-                // });
             }else{
                 this_ref.trigger_custom_event( data, 'validation_failed');
                 throw "***validation failed**"
             }
         }
+        
+         
+
+        
+        //************************************************************************************
+        //Process error message from submit_data
+        failed_submit_render_error_field_message(failed_data, field_selector ){
+            // var this_ref = this;
+            var err_msg = ""
+            failed_data.result.validations.forEach( function(validation_check ){
+               if( !validation_check.success ){
+                   err_msg += ( err_msg ? ", " + validation_check.err_msg : validation_check.err_msg )
+                   document.querySelectorAll( field_selector ).forEach( function(item ){
+                       if( item.id == validation_check.web_field_name ){
+                        item.update_form_validation_status('fail')
+                        return  //break out of loop 
+                       }
+                   });
+                //    document.querySelector(this._inp.submit_data_selector'#update_form_validation_status').update_form_validation_status('fail')
+               }
+            });
+
+            return err_msg
+        }
+
 
         //************************************************************************************
         //Fill out the option list

@@ -81,24 +81,25 @@ class DataUIModel(ZStaple):
 
 	#####################################################################################
 	def _data_validate( self, submit_data ): 
-		validate_fail_reason = {}
+		validation_result = {}
 		self.log_debug("validating data")
 		self.log_debug( submit_data )
 
-		if self.web_schema.validate(  submit_data, validate_fail_reason ):
-			self.log_debug('validation ok')
-			return True
-		self.log_debug("****:" + json.dumps( validate_fail_reason) )
-		return False
+		validation_result = self.web_schema.validate(  submit_data )
+		if validation_result['success']: self.log_debug( 'Validation checks completed - result: passed' )
+		else: self.log_error('Validation checks completed - result: failed')
+		self.log_debug("****:" + json.dumps(   validation_result ) )
+		
+		return validation_result
 
 	#####################################################################################
 	def data_delete_ajax( self, submit_data ): 
-		if self._data_validate( submit_data):
+		validation_result = self._data_validate( submit_data)
+		if validation_result['success']:
 			data_obj_list = self.data_delete( submit_data ) 
-			return json.dumps({'success':True, 'data':  data_obj_list , 'schema':self.data_schema }), 200
+			return json.dumps({'success':True, 'data':  data_obj_list , 'result': validation_result, 'schema':self.data_schema }), 200
 		else:
-			self.log_error('valdation failed')  
-			return json.dumps({'success':False}), 500 
+			return json.dumps({'success':False , 'result': validation_result }), 500 
 
 	#####################################################################################
 	def data_get_ajax( self, search_dict ):  
@@ -142,15 +143,17 @@ class DataUIModel(ZStaple):
 		if not submit_data:
 			self.log_error('No data given')  
 			return json.dumps({'success':False}), 500 
-		elif self._data_validate( submit_data):
-			data_obj_list = self.data_update( submit_data )
-			# breakpoint()
-			# webfield_mapping = self.data_get_web_fields( self.data_schema, data_obj_list)
-			return json.dumps({'success':True, 'data':  data_obj_list , 'schema':self.data_schema  }), 200
-			# return json.dumps({'success':True, 'data':  data_obj_list , 'schema':self.data_schema  }), 200
 		else:
-			self.log_error('valdation failed')  
-			return json.dumps({'success':False}), 500 
+			validation_result = self._data_validate( submit_data)
+			if validation_result['success']:
+				data_obj_list = self.data_update( submit_data )
+				# breakpoint()
+				# webfield_mapping = self.data_get_web_fields( self.data_schema, data_obj_list)
+				return json.dumps({'success':True, 'data':  data_obj_list , 'result': validation_result, 'schema':self.data_schema  }), 200
+				# return json.dumps({'success':True, 'data':  data_obj_list , 'schema':self.data_schema  }), 200
+			else:
+				self.log_error('Could not update data as valdation failed')  
+				return json.dumps({'success':False,  'result': validation_result } ), 500 
 
 
 

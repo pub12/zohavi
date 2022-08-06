@@ -10,9 +10,7 @@ class FieldChecker_Extractor{
 export  class FieldChecker_Extractor_WC extends FieldChecker_Extractor{
     constructor(wc_obj){
         super()
-        this._source = wc_obj
-        // this._get_field_fn = wc_obj.getAttribute  //Get Attribute function name
-        // this._get_all_fields_fn = wc_obj.getAttributeNames
+        this._source = wc_obj 
     }
     get_all_fields(){ 
         return this._source.getAttributeNames()
@@ -114,6 +112,7 @@ export  class FieldChecker  {
                 }
             };
         }
+        // debugger;
         if( missing_list.length>0){ throw `Missing required fields  [${missing_list.join(",")}] and/or Invalid fields: ${invalid_list.join(",")}` }
         return true;
     }

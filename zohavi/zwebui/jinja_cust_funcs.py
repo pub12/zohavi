@@ -120,6 +120,45 @@ class JCFunc:
 
 		print( f"****:{attrib_str}")
 		return attrib_str
+	
+	def fill_attribs( attrib_type: str, table_obj:str, field_id:str, data_ui: dict, data: any ):
+		attrib_filler_func = {
+								'wc-input-text': JCFunc._fill_attribs_wc_input_text
+		}
+		# breakpoint()
+		if attrib_type in attrib_filler_func: return attrib_filler_func[attrib_type](table_obj, field_id, data_ui, data)
+		return f"ERROR: ATTRIB_TYPE [{attrib_type}] not found"
+
+	def _fill_attribs_wc_input_text(table_obj:str, field_id:str, data_ui: dict, data: any):
+		# breakpoint()
+		field_schema = data_ui.get_field_schema( table_obj ,  field_id )
+
+		attrib_str =  f'id="{ field_id }"  ' 
+		attrib_str += f'placeholder="{ field_schema.get( "placeholder","") }"  ' 
+		attrib_str += f'label="{ field_schema.get( "label", "") }" '
+		attrib_str += f'message_err="{ field_schema.get( "message_err", "") }" '
+		attrib_str += "validation='{"
+
+		comma = ""
+		for key in field_schema.get('validation',{} ).keys():
+			attrib_str += comma + f'"{key}":"{ field_schema["validation"][key]}" '
+			comma = ", "
+
+		attrib_str += "}' "
+		
+		attrib_str += f'value="{ data }" '
+
+		breakpoint()
+		return attrib_str
+
+	######################################################################################################
+	# 
+	# <wc-input-text id="si_env_authsite_name"  class="ck_grp_elt" placeholder="Add site title"  label="Site Name"  validation='{"text_min_len":3}', message_err="Site name at least 3 characters" , value='defaultxx'   >
+    #         </wc-input-text> 
+	
+	
+					#   +
+					#  f'validation='{"text_min_len":3}', message_err="Site name at least 3 characters" , value='defaultxx'   
 
 	######################################################################################################
 	# expand the url from the config files
@@ -174,4 +213,4 @@ class JCFunc:
 		return list_items
 
 		
-
+	

@@ -1,4 +1,8 @@
 import re, json 
+from dataclasses import dataclass, asdict as dataclasses_asdict 
+from dataclasses_json import dataclass_json
+
+from typing import Callable
 
 from zohavi.zbase.staple import ZStaple
 from mclogger import MCLogger
@@ -29,8 +33,10 @@ class WebField( ZStaple ):
 	#############################################################################################################
 	#Validate form data in json format
 	@MCLogger.logfunc_cls('logger')
-	def validate(self, data, validate_fail_reason):
-		validation_ok = True 
+	def validate(self, data):
+		# validation_ok = True 
+		result = { 'success': True, 'validations':[] }	#Assume successful
+
 		self.log_debug( "validating:" + json.dumps(data ) )
 		self.log_debug( "Master:" + json.dumps(self._tables ) )
 
@@ -47,12 +53,13 @@ class WebField( ZStaple ):
 
 			if field_info.get('validation', False):  #has validation
 				self.log_debug( f" Checking validation {web_field_name}=>[{data_row['value']}] Rule:{json.dumps( field_info['validation']) } ") 
-
-				validation_ok = validation_ok and self._validate_run_validation_rule( data_row['value'] , field_info['validation'], validate_fail_reason  )
+				# breakpoint()
+				result = self._validate_run_validation_rule(web_field_name, data_row['value'] , field_info['validation'], result  )
 
 			if field_info.get('transform', False):  #has transformation
 				data_row['value'] = self._run_transformation( data_row['value'] , field_info['transform'] )
-		return validation_ok
+		
+		return result
 
 
 	#############################################################################################################
@@ -70,26 +77,30 @@ class WebField( ZStaple ):
 
 	#############################################################################################################
 	#Run the actual validation rule
-	def _validate_run_validation_rule(self, data_value, validation_rules, validate_fail_reason):
-		validation_ok = True 
+	def _validate_run_validation_rule(self, web_field_name, data_value, validation_rules, validation_results:dict ):
+		result = validation_results
+		if not result: result = { 'success': True, 'validations':[] }
+		# validation_ok = True 
 		# if not data_value: breakpoint()
-		self.log_debug( f" data_value={data_value}; validation_rule={'required' in validation_rules.keys()}; required={validation_rules['required']== False}")
-		if not data_value and 'required' in validation_rules.keys() and validation_rules['required'] == False: return True
+		# breakpoint()
+		self.log_debug( f" data_value={data_value}; validation_rule={json.dumps(validation_rules)}")
+		if not data_value and 'required' in validation_rules.keys() and validation_rules['required'] == False: return result
 		for rule in validation_rules: 
 			func = getattr(Validate, rule, Validate._func_not_found)  
-			ret_check = func( data_value , validation_rules[rule], self.log_error )	#Pass reference to error message for failed validatinos
+			ret_result = func( data_value , validation_rules[rule], self.log_error )	#Pass reference to error message for failed validatinos
+			ret_result.web_field_name = web_field_name
+			result['validations'].append(  dataclasses_asdict(ret_result ) )
+			log_message = f"Validation check [{rule}:{validation_rules[rule]}] on [{data_value}] => {ret_result}"
+			# if ret_check:
+			# 	self.log_debug( log_message ) 
+			# else:
+			# 	validate_fail_reason['01'] = log_message
+			# 	self.log_error( log_message )
 
-			log_message = f"Validation check [{rule}:{validation_rules[rule]}] on [{data_value}] => {ret_check}"
-			if ret_check:
-				self.log_debug( log_message ) 
-			else:
-				validate_fail_reason['01'] = log_message
-				self.log_error( log_message )
+			result['success'] = result['success'] and ret_result.success
 
-			validation_ok = validation_ok and ret_check
-
-		self.log_debug("Returning validation check from :" + json.dumps(validation_rules) + " => " + str(validation_ok) )
-		return validation_ok
+		self.log_debug("Returning validation check from :" + json.dumps(validation_rules) + " => " + str(result['success']) )
+		return result
  
 
 
@@ -109,7 +120,18 @@ class Transform(ZStaple):
 	def _map_value(value, map):
 		return map.get( value, None)
 
-
+@dataclass_json
+@dataclass
+class ValidateResult():
+	web_field_name: str = "" 
+	success: bool = False
+	rule: str = ""
+	value: object = None
+	param: object = None
+	err_no: str = ""
+	err_msg: str = ""
+	
+	
 
 class Validate(ZStaple):
 	#############################################################################################################
@@ -124,83 +146,144 @@ class Validate(ZStaple):
 	#############################################################################################################
 	#validation function not found
 	@staticmethod
-	def _func_not_found( value, param, log_err_func=print  ):
-		Validate.log(   f"Validtion function [{value}] not found", log_err_func)
+	def _func_not_found( value, param, log_err_func: Callable =print ):
+		vr = ValidateResult( rule='??', value=value,  param=param , err_no="VAL_010", err_msg='Validation Rule passed not found')
+		Validate.log( vr.err_msg , log_err_func)
+		return vr
 
 	#############################################################################################################
 	#Check that field is required 
 	@staticmethod
-	def required(  value, param, log_err_func=print   ):  
-		if not param: return True
-		return False if not value else True
-		# return True
+	def required(  value, param, log_err_func: Callable =print ):  
+		vr = ValidateResult( rule='required', value=value,  param=param )
+		if not param: vr.success = True
+		elif value: vr.success = True  
+		else:  #e.g. parameter is present, and value not given
+			vr.success = False  
+			vr.err_no = "VAL_020"
+			vr.err_msg = 'Required value not given'
+			Validate.log( vr.err_msg , log_err_func)
+
+		return vr 
 
 	#############################################################################################################
 	#Check that field has min length as required
 	@staticmethod
-	def text_min_len(  value, param, log_err_func=print  ): 
-		if len( str( value  ) ) >= param: return True
-		return False
+	def text_min_len(  value, param, log_err_func: Callable =print  ): 
+		vr = ValidateResult( rule='text_min_len', value=value,  param=param )
+
+		if len( str( value  ) ) >= param: vr.success = True
+		else: 
+			vr.success = False 
+			vr.err_no = "VAL_030"
+			vr.err_msg = f"Value [{value}] should be minimum length of {param}, but actual length is {len( str( value  ) )}"
+			Validate.log( vr.err_msg , log_err_func)
+		return vr 
 
 	#############################################################################################################
 	#Check that field has max length as required
 	@staticmethod
-	def text_max_len(  value, param, log_err_func=print  ): 
-		if len( str( value ) ) <= param: return True
+	def text_max_len(  value, param,log_err_func: Callable =print  ): 
+		vr = ValidateResult( rule='text_max_len', value=value,  param=param )
 
-		Validate.log(   "Text Length of [{value}] is {len( str( value ) )} which is greater than [{param}]", log_err_func)
+		if len( str( value ) ) <= param: vr.success= True
+		else: 
+			vr.success = False 
+			vr.err_no = "VAL_040"
+			vr.err_msg = f"Value [{value}] should be max length of {param}, but actual length is {len( str( value  ) )}"
+			Validate.log( vr.err_msg , log_err_func)
 		
-		return False
+		return vr 
 
 	#############################################################################################################
 	#Check that number is gte
 	@staticmethod
-	def num_gte(   value, param, log_err_func=print   ): 
-		if int( value ) >= int(param): return True
-		return False
+	def num_gte(   value, param, log_err_func: Callable =print ): 
+		vr = ValidateResult( rule='num_gte', value=value,  param=param )
+		if int( value ) >= int(param): vr.success= True
+		else:
+			vr.success = False 
+			vr.err_no = "VAL_050"
+			vr.err_msg = f"Value [{value}] should be greater than or equal to {param}, but actual is { int( value )}"
+			Validate.log( vr.err_msg , log_err_func)
+		
+		return vr 
 
 	#############################################################################################################
 	#Check that number is gte
-	def num_lte(  value, param , log_err_func=print  ): 
-		if int( value ) <= int(param): return True
-		return False
+	def num_lte(  value, param , log_err_func: Callable =print  ): 
+		vr = ValidateResult( rule='num_lte', value=value,  param=param )
+		if int( value ) <= int(param): vr.success= True
+		else:
+			vr.success = False 
+			vr.err_no = "VAL_060"
+			vr.err_msg = f"Value [{value}] should be less than or equal to {param}, but actual is { int( value )}"
+			Validate.log( vr.err_msg , log_err_func)
+		return vr 
 
 	#############################################################################################################
 	#Check that field has max length as required
 	@staticmethod
-	def is_url(  value, param=None, log_err_func=print ):  
+	def is_url(  value, param=None, log_err_func: Callable =print ):  
+		vr = ValidateResult( rule='is_url', value=value,  param=param )
 		url_re = r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?\xab\xbb\u201c\u201d\u2018\u2019]))'
 		url = re.findall(url_re, value )
-		return True if url else False
+		if url:  vr.success= True
+		else:
+			vr.success = False 
+			vr.err_no = "VAL_070"
+			vr.err_msg = f"[{value}] is not an URL"
+			Validate.log( vr.err_msg , log_err_func)
+		return vr 
 
 	#############################################################################################################
 	#Check that field has max length as required
 	@staticmethod
-	def is_ip(  value, param=None, log_err_func=print   ):  
+	def is_ip(  value, param=None, log_err_func: Callable =print   ):  
+		vr = ValidateResult( rule='is_ip', value=value,  param=param )
 		url_re = r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'
 		url = re.findall(url_re, value )
-		return True if url else False
+		
+		if url:  vr.success= True
+		else:
+			vr.success = False 
+			vr.err_no = "VAL_080"
+			vr.err_msg = f"[{value}] is not an IP"
+			Validate.log( vr.err_msg , log_err_func)
+		return vr 
 
 
 	#############################################################################################################
 	#Check that number is gte
 	@staticmethod
-	def is_unix_path(  value , param=None, log_err_func=print  ): 
+	def is_unix_path(  value , param=None, log_err_func: Callable =print  ): 
+		vr = ValidateResult( rule='is_unix_path', value=value,  param=param )
 		path_re = r'\/?(\/?.+?)+[\/]?'
 		path = re.findall(path_re, value )
-		return True if path else False
+		if path:  vr.success= True
+		else:
+			vr.success = False 
+			vr.err_no = "VAL_090"
+			vr.err_msg = f"[{value}] is not a unix-style path"
+			Validate.log( vr.err_msg , log_err_func)
+		return vr 
+
 
 	#############################################################################################################
 	#validation function not found
 	@staticmethod
-	def is_bool( value, param, log_err_func=print  ):
+	def is_bool( value, param, log_err_func: Callable =print ):
+		vr = ValidateResult( rule='required', value=value,  param=param )
 		valid_values = [ True, False, '', None ]
-		if value in valid_values: return True
-
-		Validate.log(  f"Value [{value}] is not a boolean", log_err_func)
-
-		return False 
+		if value in valid_values:  vr.success= True
+		else:
+			vr.success = False 
+			vr.err_no = "VAL_090"
+			vr.err_msg = f"Value [{value}] is not a boolean"
+			Validate.log( vr.err_msg , log_err_func)
+		return vr 
 
 	@staticmethod
-	def log( message, log_err_func=print  ):
-		log_err_func( "Validation Failture: " + message )
+	def log( message, log_err_func: Callable =print ):
+
+		log_err_func( "Validation Failure: " + message )

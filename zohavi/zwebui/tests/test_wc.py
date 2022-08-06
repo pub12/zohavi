@@ -36,7 +36,7 @@ site_update_schema = {
 											"si_env_id":{"field_db":"id",   "key":True},
 											"si_env_cs":{"field_db":"env_cs", "validation":{"required":True} },
 											"si_env_authlogon":{"field_db":"env_authlogon", "validation":{"required":True} },
-											"si_env_authsite_name":{"field_db":"env_authsite_name", "validation":{"required":False,  "text_max_len":10} },
+											"si_env_authsite_name":{"field_db":"env_authsite_name", "validation":{"required":False,"text_min_len":4,   "text_max_len":10} },
 											"si_env_authmethod":{"field_db":"env_auth_method", "validation":{"required":False} },
 											
 								}
@@ -93,8 +93,8 @@ class SiteEnv( db.Model ,  TBL_Default):
 
 
 db.create_all()
-# db.session.add( SiteEnv(env_name='dev', env_desc='Twitter Bot', env_code='dev1') )
-# db.session.commit()
+db.session.add( SiteEnv(env_name='dev', env_desc='Twitter Bot', env_code='dev1'  ) )
+db.session.commit()
 
 # myapp = AppCore(app, sccfg, 'dev' )
 
@@ -123,6 +123,16 @@ def test_menu( ):
 def test_table( ):
 	return render_template( 'test_table.html')
 
+#################################################################
+@app.route('/test/button', methods=['GET' ] )
+def test_button( ):
+	return render_template( 'test_button.html')
+
+
+#################################################################
+@app.route('/button/click', methods=['POST' ] )
+def test_button_click( ):
+	return  json.dumps({'success':True}), 200
 
 
 #################################################################
@@ -140,8 +150,9 @@ def test_all( ):
 #################################################################
 @app.route('/test/group', methods=['GET' ] )
 def test_group( ):
-	data_ui = DataUIModel(  site_update_schema['SiteEnv'] , db.session, logger )
-	return render_template( 'test_group.html', data_ui=data_ui)
+	data_ui = DataUIModel(  site_update_schema['SiteEnvSetting'] , db.session, logger )
+	env_data = SiteEnv.query.first()
+	return render_template( 'test_group.html', data_ui=data_ui, env_data=env_data)
 
 #################################################################
 @app.route('/test/group/save', methods=['POST' ] )

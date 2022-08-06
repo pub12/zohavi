@@ -10,7 +10,7 @@
           action="/test/group/save"
           popup_message_submit_success="Site Added"
           popup_message_submit_fail="Internal error in adding new site"
-          submit_data_selector = ".ck_grp_elt"
+          submit_data_selector = "#logon_checks .ck_grp_elt"
           >
 
     <wc-hidden id="si_env_id" value="1"></wc-hidden>
@@ -24,8 +24,7 @@
       <wc-tab-panel class="  "   id="si_env_authlogon_option">
         <div class="container sc_layer_0 ">  
 
-            <wc-input-text id="si_env_authsite_name" {{ jc_set_elt_attribs( data_ui.get_field_schema('SiteEnv', "si_env_name") , class="ck_grp_elt",placeholder="Add site title", label="Site Name", placeholder="Add site title", validation='{"text_min_len":3}', message_err="Site name at least 3 characters" , value='defaultxx'  )|safe  }} >
-            </wc-input-text>   
+            <wc-input-text  {{jc_fill_attribs("wc-input-text", "SiteEnv", "si_env_authsite_name", data_ui, env_data.env_desc  )|safe }} ></wc-input-text>
 
             <wc-radio-button  id="si_env_authmethod" class="ck_grp_elt" 
                               label = "Chose authentication mode"
