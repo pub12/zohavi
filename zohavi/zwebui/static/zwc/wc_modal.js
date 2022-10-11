@@ -25,8 +25,8 @@
     //Check fields for INPUT
     class WCDispatch_Input extends WCDispatcher{
         constructor(inp_obj, field_id){ 
-            super( new FieldChecker( {"id":field_id, "label":"", "validation":"", "message_err":"", "value":""}, [], 
-                   new FieldChecker_Extractor_Dict( inp_obj ) )  );   
+            super( new FieldChecker( {"id":field_id, "label":"", "type":"", "validation":"", "message_err":"", "value":""}, [], 
+                   new FieldChecker_Extractor_Dict( inp_obj ), "Input["+field_id+"]" )  );   
         }
         get_html(json){
             var validation ="";
@@ -42,8 +42,8 @@
     //Check fields for INPUT HIDDEN
     class WCDispatch_Hidden extends WCDispatcher{
         constructor(inp_obj, field_id){ 
-            super( new FieldChecker( {"id":field_id, "label":"" , "value":""}, [], 
-                   new FieldChecker_Extractor_Dict( inp_obj ) )  );   
+            super( new FieldChecker( {"id":field_id, "label":"" , "type":"", "validation":"","value":""}, [], 
+                   new FieldChecker_Extractor_Dict( inp_obj ), "Hidden["+field_id+"]" )  );   
         }
         get_html(json){
             var validation ="";
@@ -58,8 +58,8 @@
     //Check fields for INPUT
     class WCDispatch_Select extends WCDispatcher{
         constructor(inp_obj, field_id){ 
-            super( new FieldChecker( {"id":field_id, "label":"", "validation":"", "message_err":"", "value":"", "list":""}, [], 
-                   new FieldChecker_Extractor_Dict( inp_obj ) )  );
+            super( new FieldChecker( {"id":field_id, "label":"", "type":"", "validation":"", "message_err":"", "value":"", "list":""}, [], 
+                   new FieldChecker_Extractor_Dict( inp_obj ), "Select["+field_id+"]" )  );
         }
 
         get_html(json){
@@ -85,8 +85,8 @@
     //Check fields for CHECKBOX
     class WCDispatch_Checkbox extends WCDispatcher{
         constructor(inp_obj, field_id){ 
-            super( new FieldChecker( {"id":field_id,"label":"", "checkbox_label":"", "value=bool":""}, [], 
-                   new FieldChecker_Extractor_Dict( inp_obj ) ) );
+            super( new FieldChecker( {"id":field_id,"label":"","type":"",  "checkbox_label":"", "value=bool":""}, [], 
+                   new FieldChecker_Extractor_Dict( inp_obj ), "Checkbox["+field_id+"]" ) );
         }
 
         get_html(){
@@ -146,7 +146,7 @@
         //                  
         //              ]
         constructor(){
-            super( {"title":"", "buttons=json":"[]"}, ["fields=json"]);  
+            super( {"id":"", "title":"", "buttons=json":"[]"}, ["fields=json"]);  
 
 
             this.components = {

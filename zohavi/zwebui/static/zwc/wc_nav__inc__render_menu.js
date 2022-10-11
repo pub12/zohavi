@@ -53,7 +53,8 @@
         //Render all the menu items
         render_sidebar( ){
             var $sbar_menu= this.menu_obj.wc_shadowRoot.querySelector('#si_sbar_menu');
-            var menu_config = JSON.parse( this.menu_obj.wc_inp_data.sbar_menu_list );  
+            // var menu_config = JSON.parse( this.menu_obj.wc_inp_data.sbar_menu_list );  
+            var menu_config = this.menu_obj.wc_inp_data.sbar_menu_list ;  
             if( typeof menu_config == 'undefined' || menu_config == null ){ 
                 debugger;
                 throw `Could not parse JSON for element ` ;
@@ -228,7 +229,7 @@
         //**********************************************************************************************
         init_menus(){
             var $menu_item = this.menu_obj.wc_shadowRoot.querySelector('#si_navbar_menu_start');
-            var menustart_config = JSON.parse( this.menu_obj.wc_inp_data.header_menu_start );
+            var menustart_config = this.menu_obj.wc_inp_data.header_menu_start ;
 
             var menu_items_str = "";
             for (var key of Object.keys(menustart_config)){

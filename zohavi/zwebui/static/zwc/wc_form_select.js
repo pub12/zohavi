@@ -24,7 +24,7 @@
         }
 
         constructor(){
-            super({  "label":"",  "message_err":"", "value":"", "list=json":"", 
+            super({  "class":"", "validation":"", "label":"",  "message_err":"", "value":"", "list=json":"", 
                      "blank_entry":"", "item_select_get_data":"", "select_change_target":""}, ["id"]);  
               
             // this.init_input_text_defaults(); 

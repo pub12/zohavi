@@ -17,7 +17,7 @@
         }
 
         constructor(){
-            super([  ], ["id", "value"]);   
+            super(  {"class":"" , "label":"" }, ["id", "value"]);   
         } 
         //************************************************************************************
         //Setup the defaults and events

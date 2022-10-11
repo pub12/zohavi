@@ -27,7 +27,7 @@
         //*********************************************************************************************************************
         // CONSTRUCTOR
         constructor() {
-            super( {    action:"", active_class:"is-primary", deactive_class:"[disabled]", 
+            super( {    id:"", action:"", active_class:"is-primary", deactive_class:"[disabled]", 
                         size: "is-small", submit_data_selector:"", 
                         popup_message_submit_success:"", 
                         popup_message_submit_fail:""
@@ -47,7 +47,7 @@
             //send out the button click
             this.shadowRoot.querySelector('#si_field').addEventListener('click', function( event ){
 
-                if( this_ref._inp.action ){   //send submit
+                if( this_ref._inp.action_submit ){   //send submit
                     this_ref.submit_data(event);
                 }
 

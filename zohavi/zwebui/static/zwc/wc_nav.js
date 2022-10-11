@@ -83,15 +83,17 @@
 
         define_template_header_html(){
             if( ! this._inp.header_on ){ return '';}
+            var hamburger_html = `  <a id="si_header_sbar_menu_icon" class="navbar-item sc_sbar_menuicon " href="#">
+                                        <i class="fas fa-bars"></i>
+                                    </a>`
             return `
                 <!-- ## HEADER ## -->
                 <div id="header">
                     <nav id="si_mview_topnav" class="navbar is-fixed-top has-shadow " role="navigation"
                         aria-label="main navigation">
                         <div class="navbar-brand">
-                            <a id="si_header_sbar_menu_icon" class="navbar-item sc_sbar_menuicon " href="#">
-                                <i class="fas fa-bars"></i>
-                            </a>
+                            ${ this._inp.sidebar_on ? hamburger_html  : '' }
+                            
                             <a class="navbar-item" id="si_logo_header_link">
                                 <img id="si_logo_header_img" src="" width="112" height="28">
                             </a>
@@ -328,14 +330,17 @@
         constructor() {  
 
             super( {"logo_header_img_src":"", "logo_header_link":"", "logo_sidebar_img_src":"", "logo_sidebar_link":"", 
-                    "header_menu_start":"", "header_height_px":55, "sbar_full_width_px":250, "mobile_width_breakpoint_px":768, 
-                    "sbar_menu_list":"" ,  "header_on=bool":false, "sidebar_on=bool":false, "sidebar_minimised":true, "sbar_min_width_px":40,
+                    "header_menu_start=json":"", "header_height_px":55, "sbar_full_width_px":250, "mobile_width_breakpoint_px":768, 
+                    "sbar_menu_list=json":"" ,  "header_on=bool":false, "sidebar_on=bool":false, "sidebar_minimised":true, "sbar_min_width_px":40,
                     "sbar_renderer":"full", "sbar_visibility":"always-on", "sbar_content_area":"push", 
                     "sbar_color": getComputedStyle(document.body).getPropertyValue('--background_cat1_color') ,
                     "header_renderer":"def", "header_visibility":"always-on", "header_content_area":"push", "header_color": 'green',
                     "sbar_active_menu_item":"", "header_active_menu_item":"", "sbar_disable_menu_list=array":"", "header_disable_menu_list":""
                      }, 
                     ["main_div_selector"]); 
+
+            this.#validate_inp_json_schema_sbar_menu_list()
+
             // debugger;
             var sbar_menu_options = { 
                                     "renderer":{    "mini": new Render_Menu_Sidebar_Mini(),
@@ -391,20 +396,56 @@
         //Setup the defaults and events
         connectedCallback(){    
             
+            
+
             if( this._inp.header_on){   this.header.connectedCallback(); }
             if( this._inp.sidebar_on ){ this.sidebar.connectedCallback() }
 
             if( this._inp.header_on){   this.header.register_linked_menu( this.sidebar );  }
             if( this._inp.sidebar_on ){ this.sidebar.register_linked_menu( this.header ) ; }
 
-                
-                
             
+            
+        } 
 
+        #validate_inp_json_schema_sbar_menu_list(){
+            const schema = {
+                type: "array",
+                items: {
+                            type: "object",
+                            properties:{
+                                            menus   : { type: "array",
+                                                        items: {
+                                                                    type: "object",
+                                                                    properties:{
+                                                                                    title   : {type: "string"},
+                                                                                    id      : {type: "string"},
+                                                                                    link    : {type: "string"},
+                                                                                    icon    : {type: "string"},
+                                                                                    sub_menu: { type: "array",
+                                                                                                items: {
+                                                                                                            type: "object",
+                                                                                                            properties:{
+                                                                                                                            title   : {type: "string"},
+                                                                                                                            id      : {type: "string"},
+                                                                                                                            link    : {type: "string"},
+                                                                                                                            icon    : {type: "string"}
+                                                                                                            },
+                                                                                                            required: [ "title", "id"]
+                                                                                                }
+                                                                                            }
+                                                                                },
+                                                                    required: [ "title", "id"]
+                                                        }
+                                                    },            
+                                            section : { type: "string"}
+                                        },
+                            required: [ "menus"]
+                        }
+                }
             
-            
+            this.validate_inp_json_schema( 'sbar_menu_list', this._inp.sbar_menu_list, schema )
         }
- 
  
     }
 

@@ -36,7 +36,7 @@
         }
 
         constructor(){
-            super( {"label":"", "radio_list=json":"", "render":"horizontal"}, ["id"]); 
+            super( { "class":"", "validation":"","label":"", "radio_list=json":"", "render":"horizontal"}, ["id"]); 
 
             // super();  
             

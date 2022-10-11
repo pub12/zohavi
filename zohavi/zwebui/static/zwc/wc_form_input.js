@@ -40,7 +40,7 @@
         }
 
         constructor(){
-            super( {"label":"", "placeholder":"", "validation=json":"", "message_err":"", "value":"", "icon_left":"", "icon_right":""}, ["id"]); 
+            super( {"class":"", "label":"", "placeholder":"", "validation=json":"", "message_err":"", "value":"", "icon_left":"", "icon_right":""}, ["id"]); 
             // console.log('create input')
         } 
     

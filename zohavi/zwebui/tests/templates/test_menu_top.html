@@ -1,0 +1,44 @@
+
+{% extends "test_base.html" %} 
+
+{#% block main_header %}Test Table{% endblock %#}
+
+
+{% block body_content %}
+<div class="menu_area">
+
+    <wc-nav id = "site_config_nav" 
+            sidebar_hamburger = 'false'
+            main_div_selector = "#main_area" 
+            header_on = 'true'
+            sidebar_on = 'false'
+            sbar_color = 'grey'  
+            sbar_visibility = 'always-on'    
+            header_menu_start = '{
+                                    "XXSS":"https://google.com",
+                                    "About":"https://tesla.com", 
+                                    "More":[
+                                            {"AA":"https://abc.com",
+                                            "BB":"https://xyz.com"} 
+                                            ] 
+                                }'>
+    </wc-nav>
+</div>
+<div id="main_area">
+</div>
+
+{% endblock %}
+
+
+{% block page_script %}
+  <script>
+    
+    document.addEventListener('DOMContentLoaded', function () {
+       
+    });
+
+  </script> 
+
+  <script type="module" src="/webui/static/zwc/wc_nav.js"></script>  
+
+{% endblock %}

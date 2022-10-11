@@ -40,9 +40,9 @@ export  class FieldChecker_Extractor_Dict extends FieldChecker_Extractor{
 //Check if all fields in the given option dictionary entries and required fields are valid.
 export  class FieldChecker  { 
 
-    constructor(optional_attrib_dict, mandatory_attrib_list, field_extractor_obj ){
+    constructor(optional_attrib_dict, mandatory_attrib_list, field_extractor_obj, ref_label ){
 
-
+        this._ref_label = ref_label //identifier label to support error messages
     	// this._opt_dict  = optional_attrib_dict
     	// this._reqd_list = mandatory_attrib_list
         this._field_extractor = field_extractor_obj
@@ -90,16 +90,16 @@ export  class FieldChecker  {
     //************************************************************************************
     //check the attributes that are passed in the web component
     check_required_fields(){ 
-        var invalid_list = [];
-        var missing_list = []
+        var invalid_dict = {};
+        var missing_dict = {}
         var obj_this = this;
         var actual_field_list = this._field_extractor.get_all_fields()
         var optional_fieldname_list = Object.keys(this._opt_dict)
         // debugger;
         if(optional_fieldname_list){    //Check optional fields
-            actual_field_list.forEach( function(item){
-                if( ! obj_this._check_input_field_exists(optional_fieldname_list, item) ) { 
-                    invalid_list.push( item ) 
+            actual_field_list.forEach( function(field_name){
+                if( ! obj_this._check_input_field_exists(optional_fieldname_list, field_name) ) { 
+                    invalid_dict[ field_name ] = "invalid"
                 }
             }); 
         }
@@ -108,12 +108,15 @@ export  class FieldChecker  {
             // this._reqd_list.forEach( function(attrib_item ){ 
             for( var field_name in this._reqd_list ){
                 if( ! obj_this._check_input_field_exists(actual_field_list,  field_name ) ){ 
-                    missing_list.push(field_name )
+                    missing_dict[ field_name ] = "missing"
+                }else{
+                    delete invalid_dict[ field_name ]  //if found, it was found invalid list before, remove it
                 }
             };
         }
         // debugger;
-        if( missing_list.length>0){ throw `Missing required fields  [${missing_list.join(",")}] and/or Invalid fields: ${invalid_list.join(",")}` }
+        if( Object.keys(missing_dict).length >0){ throw `Missing required fields for ${this._ref_label} :: [${Object.keys(missing_dict).join(",")}]`}
+        if( Object.keys(invalid_dict).length >0){ console.warn( `Invalid fields for ${this._ref_label} :: [${Object.keys(invalid_dict).join(",")}]`) }
         return true;
     }
 

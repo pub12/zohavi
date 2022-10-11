@@ -10,15 +10,16 @@
                         add_row="Add +"
 
                         submit_hidden_data='{"id":"access_key", "value":"112233" }' 
-                        submit_on_del='/test/table/ajax_del'
-                        submit_on_add='/test/table/ajax_add'
-                        submit_on_edit='/test/table/ajax_edit'
+                        
+                        url_submit_bulk = '{{ url_for("db_bulk_ajax") }}' 
+                        url_submit_on_del='/test/table/ajax_del'
+                        url_submit_on_add='/test/table/ajax_add'
+                        url_submit_on_edit='/test/table/ajax_edit'
+                        
                         popup_messages='{ "add_success":"added", "add_fail":"failed to add", 
                                           "edit_success":"edited", "edit_fail":"failed to edit", 
                                           "del_success":"deleted", "del_fail":"failed to delete" }'
-                        popup_message_submit_success="added"
-                        popup_message_submit_fail = "failed to add"
-
+                        submit_method="auto"
                         columns='[
                               {"col_label":"ID", "id":"si_env_id", "editable":"false", "hidden":"true","key_field":"true"},
                               {"col_label":"Name", "id":"si_env_name", "editable":"true"},
@@ -61,26 +62,38 @@
                             add_row="Add +"
 
                             xxx_submit_hidden_data='{"id":"access_key", "value":"112233" }' 
-                            submit_on_del='/test/table/ajax_del'
-                            submit_on_add='/test/table/ajax_add'
-                            submit_on_edit='/test/table/ajax_edit'
+                            url_submit_bulk = '{{ url_for("db_bulk_ajax") }}' 
+                            url_submit_on_del='/test/table/ajax_del'
+                            url_submit_on_add='/test/table/ajax_add'
+                            url_submit_on_edit='/test/table/ajax_edit'
+                            
                             popup_messages='{ "add_success":"added", "add_fail":"failed to add", 
                                               "edit_success":"edited", "edit_fail":"failed to edit", 
                                               "del_success":"deleted", "del_fail":"failed to delete" }'
-                            popup_message_submit_success="added"
-                            popup_message_submit_fail = "failed to add"
+                            
+                            submit_method="manual" 
 
                             columns='[
                                   {"col_label":"ID", "id":"si_env_id", "editable":"false", "hidden":"true","key_field":"true"},
                                   {"col_label":"Name", "id":"si_env_name", "editable":"true"},
-                                  {"col_label":"Description", "id":"si_env_desc", "editable":"true" },
+                                  {"col_label":"Description", "id":"si_env_desc", "editable":"true", "validation":{"required":"true"} },
                                   {"col_label":"Code", "id":"si_env_code", "editable":"true", "validation":{"text_min_len":4}  },
                                   {"col_label":"Action", "id":"si_env_action", "type":"actions", "data-key":"ck_env_edit", "actions":["edit","delete"] }
                             ]'
+                            data = '[
+                                        {% for env_data in env_data_list %}
+                                          [ {"id":"si_env_id", "value":"{{env_data.id}}" },
+                                            {"id":"si_env_name", "value":"{{env_data.env_name}}", "data-value":"{{env_data.id}}" },
+                                            {"id":"si_env_desc", "value":"{{env_data.env_desc}}"},
+                                            {"id":"si_env_code", "value":"{{env_data.env_code}}"} 
+                                          ]
+                                          {% if not loop.last %} , {% endif %}
+                                        {% endfor %}
+                                    ]' 
 
-                            data='[ [ {"id":"si_env_id", "value":"1" },
+                            dataxx='[ [ {"id":"si_env_id", "value":"1" },
                                      {"id":"si_env_name", "value":"Dev", "data-value":"1" },
-                                                          {"id":"si_env_desc", "value":"Development"},
+                                                          {"id":"si_env_desc", "value":""},
                                                           {"id":"si_env_code", "value":"dev"} 
                                                         ] ,
                                     [ {"id":"si_env_id", "value":"2"  },

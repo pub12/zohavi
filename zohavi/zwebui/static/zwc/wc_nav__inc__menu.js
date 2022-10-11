@@ -198,7 +198,9 @@
             super.register_linked_menu( wc_linked_menu_obj ) 
  
             var si_header_sbar_menu_icon =  this.wc_shadowRoot.getElementById('si_header_sbar_menu_icon') 
-            si_header_sbar_menu_icon.addEventListener( 'click',  (event)=> this.side_menu_trigger(event) );
+            if( si_header_sbar_menu_icon){
+                si_header_sbar_menu_icon.addEventListener( 'click',  (event)=> this.side_menu_trigger(event) );
+            }
         }
 
         side_menu_trigger( ){

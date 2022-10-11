@@ -3,6 +3,8 @@
 import C_UTIL from '/webui/static/zjs/common_utils.js'; // 
 import {FieldChecker, 
         FieldChecker_Extractor_WC} from '/webui/static/zjs/field_checker.js'
+import  ajv7  from  "/webui/static/zjs/ajv7.js" 
+
 
  export default class WCMaster extends HTMLElement { 
     define_template(){
@@ -26,7 +28,8 @@ import {FieldChecker,
         this.process_attributes(optional_attrib_dict, mandatory_attrib_list)
 
         
-
+        this.ajv = new ajv7( {coerceTypes: true} )
+        
         this._debug = false 
         
 
@@ -39,7 +42,8 @@ import {FieldChecker,
 
     //************************************************************************************
     process_attributes(optional_attrib_dict, mandatory_attrib_list){
-        this.field_checker = new FieldChecker( optional_attrib_dict, mandatory_attrib_list, new FieldChecker_Extractor_WC(this) )
+        this.field_checker = new FieldChecker( optional_attrib_dict, mandatory_attrib_list, 
+                                                new FieldChecker_Extractor_WC(this), this.tagName +"[" + this.id+"]" )
         this.field_checker.check_required_fields();   //check that mandatory fields given
 
         this._orig_inp = this.field_checker.get_dict(); 
@@ -116,7 +120,19 @@ import {FieldChecker,
     }
 
 
-
+    //************************************************************************************
+    // check schema
+    validate_inp_json_schema( attribute_name, attribute_value, schema){
+        if(attribute_value){
+            const validate = this.ajv.compile(schema)
+            const valid = validate( attribute_value )
+            if (!valid){
+                // debugger;
+                throw `Failed validation of json for ${this._inp.id} '${attribute_name}':: [${ JSON.stringify(validate.errors)}]`;
+            }
+        }
+        return true;
+    }
 
     is_debug(){ return false; } 
     //************************************************************************************

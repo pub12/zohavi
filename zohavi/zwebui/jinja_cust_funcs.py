@@ -148,7 +148,7 @@ class JCFunc:
 		
 		attrib_str += f'value="{ data }" '
 
-		breakpoint()
+		# breakpoint()
 		return attrib_str
 
 	######################################################################################################

@@ -69,7 +69,8 @@ Base = declarative_base()
 # session.commit()
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 JCFunc.load_template_funcions( app.jinja_env)
@@ -92,9 +93,9 @@ class SiteEnv( db.Model ,  TBL_Default):
 
 
 
-db.create_all()
-db.session.add( SiteEnv(env_name='dev', env_desc='Twitter Bot', env_code='dev1'  ) )
-db.session.commit()
+# db.create_all()
+# db.session.add( SiteEnv(env_name='dev', env_desc='Twitter Bot', env_code='dev1'  ) )
+# db.session.commit()
 
 # myapp = AppCore(app, sccfg, 'dev' )
 
@@ -114,18 +115,65 @@ def webui_path( url ):
 	return render_template( 'test_table.html')
 
 #################################################################
-@app.route('/test/menu', methods=['GET' ] )
-def test_menu( ):
-	return render_template( 'test_menu.html')
- 
+@app.route('/test/menu_side', methods=['GET' ] )
+def test_menu_side( ):
+	return render_template( 'test_menu_side.html')
+
+#################################################################
+@app.route('/test/menu_top', methods=['GET' ] )
+def test_menu_top( ):
+	return render_template( 'test_menu_top.html')
+
+#################################################################
+@app.route('/test/menu_topside', methods=['GET' ] )
+def test_menu_topside( ):
+	return render_template( 'test_menu_topside.html')
+
+
 #################################################################
 @app.route('/test/table', methods=['GET' ] )
 def test_table( ):
-	return render_template( 'test_table.html')
+	data_ui = DataUIModel(  site_update_schema['SiteEnvSetting'] , db.session, logger )
+	env_data_list = SiteEnv.query.all() 
+	return render_template( 'test_table.html', data_ui=data_ui, env_data_list=env_data_list)
+
+#################################################################
+@app.route("/test/table/ajax_add", methods=["POST"])
+def test_table_add():
+	logger.debug( request.json )
+	data_ui = DataUIModel(  site_update_schema['SiteEnv'] , db.session, logger )
+	return data_ui.data_update_ajax( request.json )
+	# return json.dumps({'success':True}), 200
+
+#################################################################
+@app.route("/test/table/ajax_edit", methods=["POST"])
+def test_table_edit():
+	logger.debug( request.json )
+	data_ui = DataUIModel( site_update_schema['SiteEnv'] , db.session, logger )
+	return data_ui.data_update_ajax( request.json )
+
+#################################################################
+@app.route("/test/table/ajax_del", methods=["POST"])
+def test_table_del():
+	logger.debug( request.json )
+	data_ui = DataUIModel(   site_update_schema['SiteEnv'] , db.session, logger )
+	return data_ui.data_delete_ajax( request.json ) 
+
+##############################################################################################################
+#
+##############################################################################################################
+@app.route('/test/table/db_bulk_ajax/', methods=[ 'POST'], endpoint='db_bulk_ajax')
+# @loggedin_and_ready_user
+# @logger.logfunc_loc
+def db_bulk_ajax(): 
+	data_ui = DataUIModel(  site_update_schema ['SiteEnv'] , db.session, logger ) 
+	return data_ui.data_bulk_update_ajax( request.json ) 
+
 
 #################################################################
 @app.route('/test/button', methods=['GET' ] )
 def test_button( ):
+
 	return render_template( 'test_button.html')
 
 
@@ -159,28 +207,6 @@ def test_group( ):
 def test_group_save( ):
 	data_ui = DataUIModel(  site_update_schema['SiteEnvSetting'] , db.session, logger )
 	return data_ui.data_update_ajax( request.json )
-
-#################################################################
-@app.route("/test/table/ajax_add", methods=["POST"])
-def test_table_add():
-	logger.debug( request.json )
-	data_ui = DataUIModel(  site_update_schema['SiteEnv'] , db.session, logger )
-	return data_ui.data_update_ajax( request.json )
-	# return json.dumps({'success':True}), 200
-
-#################################################################
-@app.route("/test/table/ajax_edit", methods=["POST"])
-def test_table_edit():
-	logger.debug( request.json )
-	data_ui = DataUIModel( site_update_schema['SiteEnv'] , db.session, logger )
-	return data_ui.data_update_ajax( request.json )
-
-#################################################################
-@app.route("/test/table/ajax_del", methods=["POST"])
-def test_table_del():
-	logger.debug( request.json )
-	data_ui = DataUIModel(   site_update_schema['SiteEnv'] , db.session, logger )
-	return data_ui.data_delete_ajax( request.json ) 
 
 
 
